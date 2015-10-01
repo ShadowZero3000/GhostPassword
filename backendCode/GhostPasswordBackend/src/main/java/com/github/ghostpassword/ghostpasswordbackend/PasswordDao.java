@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -48,6 +49,8 @@ public class PasswordDao
      */
     public static final String DEFAULT_CHARSET = "UTF-8";
 
+    public static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX");
+    
     /**
      * Salt string.
      */
@@ -79,8 +82,12 @@ public class PasswordDao
      */
     private PasswordDao() throws IOException
     {
-        boolean regenSalt;
-        if (SALT_FILE.exists())
+        boolean regenSalt = false;
+        if(!BASE_DIR.exists()){
+            BASE_DIR.mkdirs();
+            regenSalt = true;
+        }
+        if (!regenSalt && SALT_FILE.exists())
         {//if the salt file exists, we need to read from that.
             String saltFileContents = readFileAsString(SALT_FILE);//get the salt file
             if (!saltFileContents.trim().isEmpty())
@@ -89,7 +96,7 @@ public class PasswordDao
                 regenSalt = false;
             } else
             {
-                System.err.println("WARNING: SALT FILE WAS EMPTY! REGENNING");// if the file is empty, regen, and warn
+                System.err.println("WARNING: SALT FILE WAS EMPTY! REGENNING");// if the file is empty, regen, and warn; this is "bad"
                 regenSalt = true;
             }
         } else
@@ -99,6 +106,8 @@ public class PasswordDao
         if (regenSalt)
         {
             salt = EncryptUtils.generateSalt();
+            SALT_FILE.delete();//delete it if it existed
+            SALT_FILE.createNewFile();//create it fresh
             writeStringToFile(SALT_FILE, salt);
         }
 
@@ -122,7 +131,7 @@ public class PasswordDao
         writeStringToFile(new File(BASE_DIR, password.getKey()), deserializePasswordObjectToJSON(password));
     }
 
-    public Password readPassword(String masterPassword, String key) throws IOException, ParseException
+    public Password readPassword(String masterPassword, String key) throws IOException, ParseException, java.text.ParseException
     {
         String jsonFromFS = readFileAsString(new File(BASE_DIR, key));
         Password password = serializeJSONToPasswordObject(jsonFromFS);
@@ -136,7 +145,7 @@ public class PasswordDao
         f.delete();
     }
 
-    public List<Password> getAllPasswords() throws IOException, ParseException
+    public List<Password> getAllPasswords() throws IOException, ParseException, java.text.ParseException
     {
         ArrayList<Password> toReturn = new ArrayList<>();
         File[] allFiles = BASE_DIR.listFiles();
@@ -168,12 +177,12 @@ public class PasswordDao
         object.put("numberOfTimesUsed", password.getNumberOfTimesUsed());
         if (password.getLastAccessed() != null);
         {
-            object.put("lastAccessed", password.getLastAccessed());
+            object.put("lastAccessed", sdf.format(password.getLastAccessed()));
         }
         return object.toJSONString();
     }
 
-    private Password serializeJSONToPasswordObject(String json) throws ParseException
+    private Password serializeJSONToPasswordObject(String json) throws ParseException, java.text.ParseException
     {
         JSONParser parser = new JSONParser();
         JSONObject jsonObject = (JSONObject) parser.parse(json);
@@ -184,7 +193,7 @@ public class PasswordDao
         }
         if (jsonObject.get("lastAccessed") != null)
         {
-            toReturn.setLastAccessed((Date) jsonObject.get("lastAccessed"));
+            toReturn.setLastAccessed(sdf.parse((String)jsonObject.get("lastAccessed")));
         }
         return toReturn;
     }

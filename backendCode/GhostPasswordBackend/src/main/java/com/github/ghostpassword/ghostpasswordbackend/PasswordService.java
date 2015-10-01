@@ -57,7 +57,7 @@ public class PasswordService
         return dao.passwordExists(masterPassword);
     }
 
-    public Password getPasswordDecrypted(String key) throws IOException, ParseException
+    public Password getPasswordDecrypted(String key) throws IOException, ParseException, java.text.ParseException
     {
         Password password = dao.readPassword(masterPassword, key);
         password.setLastAccessed(new Date());
@@ -65,7 +65,7 @@ public class PasswordService
         return password;
     }
 
-    public List<Password> getAllPasswordsOrderByRecentlyUsed() throws IOException, ParseException
+    public List<Password> getAllPasswordsOrderByRecentlyUsed() throws IOException, ParseException, java.text.ParseException
     {
         Comparator<Password> comparator = new Comparator<Password>()
         {
@@ -89,7 +89,7 @@ public class PasswordService
         return passwords;
     }
 
-    public List<Password> getAllPasswordsOrderByAlphabetical() throws IOException, ParseException
+    public List<Password> getAllPasswordsOrderByAlphabetical() throws IOException, ParseException, java.text.ParseException
     {
         Comparator<Password> comparator = new Comparator<Password>()
         {
