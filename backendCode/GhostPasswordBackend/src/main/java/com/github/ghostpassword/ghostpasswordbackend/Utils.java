@@ -12,7 +12,7 @@ public class Utils
      * @return a file system friendly name for this password key
      */
     public static String calculateKey(String friendlyName){
-        friendlyName = friendlyName.trim();
+        friendlyName = friendlyName.trim().toLowerCase();
         friendlyName = friendlyName.replaceAll("\\Q \\E", "-");
         friendlyName = friendlyName.replaceAll("[!@#$%^&*()+\"]", "_");
         return friendlyName;

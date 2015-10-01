@@ -32,10 +32,16 @@ public class PasswordDao
      * Base directory for this app.
      */
     public static final File BASE_DIR = new File(".", "ghostpass");// the dot file (.) parent may not be correct on this; trial and error probably neede
+
     /**
      * Salt file for this app.
      */
     public static final File SALT_FILE = new File(BASE_DIR, ".salt");
+
+    /**
+     * Test file for this app.
+     */
+    public static final File TEST_FILE = new File(BASE_DIR, ".passTest");
 
     /**
      * Default character set. TODO: make this settable.
@@ -98,6 +104,11 @@ public class PasswordDao
 
     }
 
+    public boolean checkPassword(String masterPassword)
+    {
+        throw new UnsupportedOperationException("Not done yet");//TODO: come back to this
+    }
+
     public boolean passwordExists(String key)
     {
         File f = new File(BASE_DIR, key);
@@ -118,17 +129,21 @@ public class PasswordDao
         password.setPasswordText(EncryptUtils.decryptStringWithAES(salt, masterPassword, password.getPasswordText()));
         return password;
     }
-    
-    public void deletePassword(String key){
+
+    public void deletePassword(String key)
+    {
         File f = new File(BASE_DIR, key);
         f.delete();
     }
-    
-    public List<Password> getAllPasswords() throws IOException, ParseException{
+
+    public List<Password> getAllPasswords() throws IOException, ParseException
+    {
         ArrayList<Password> toReturn = new ArrayList<>();
         File[] allFiles = BASE_DIR.listFiles();
-        for(File f : allFiles){
-            if(!f.getName().equals(".salt")){
+        for (File f : allFiles)
+        {
+            if (!f.getName().equals(".salt"))
+            {
                 toReturn.add(serializeJSONToPasswordObject(readFileAsString(f)));
             }
         }
