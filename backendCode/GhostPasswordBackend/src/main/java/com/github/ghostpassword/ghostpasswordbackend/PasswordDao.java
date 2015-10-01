@@ -96,6 +96,12 @@ public class PasswordDao
 
     }
 
+    public boolean doesPasswordExist(String key)
+    {
+        File f = new File(BASE_DIR, key);
+        return f.exists();
+    }
+
     public void savePassword(String masterPassword, Password password) throws IOException
     {
         String encyptedPassword = EncryptUtils.encryptStringWithAES(salt, masterPassword, password.getPasswordText());
