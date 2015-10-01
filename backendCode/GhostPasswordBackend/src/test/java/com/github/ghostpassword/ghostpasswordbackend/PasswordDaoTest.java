@@ -2,6 +2,7 @@ package com.github.ghostpassword.ghostpasswordbackend;
 
 import com.github.ghostpassword.ghostpasswordbackend.domain.Password;
 import java.io.IOException;
+import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -31,13 +32,6 @@ public class PasswordDaoTest
     @AfterClass
     public static void tearDownClass()
     {
-        try
-        {
-            FileUtils.deleteDirectory(PasswordDao.BASE_DIR);
-        } catch (NullPointerException | IOException e)
-        {
-            //nada; can't clean it up; wasn't created
-        }
     }
 
     @Before
@@ -48,6 +42,13 @@ public class PasswordDaoTest
     @After
     public void tearDown()
     {
+        try
+        {
+            FileUtils.deleteDirectory(PasswordDao.BASE_DIR);
+        } catch (NullPointerException | IOException e)
+        {
+            //nada; can't clean it up; wasn't created
+        }
     }
 
     /**
@@ -95,12 +96,18 @@ public class PasswordDaoTest
         assertNotSame(plaintext, result.getPasswordText());
         assertNotSame(password.getPasswordText(), result.getPasswordText());
 
+        List<Password> passwords = instance.getAllPasswords();
+        assertTrue(passwords.size() == 1);
+
         //delete it
         instance.deletePassword(password.getKey());
 
         //check that it exists again
         exists = instance.passwordExists(password.getKey());
         assertEquals(false, exists);//it shouldn't
+
+        passwords = instance.getAllPasswords();
+        assertTrue(passwords.isEmpty());
     }
 
 }
