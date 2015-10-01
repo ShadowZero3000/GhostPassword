@@ -7,7 +7,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import org.apache.commons.io.IOUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -96,7 +98,7 @@ public class PasswordDao
 
     }
 
-    public boolean doesPasswordExist(String key)
+    public boolean passwordExists(String key)
     {
         File f = new File(BASE_DIR, key);
         return f.exists();
@@ -115,6 +117,22 @@ public class PasswordDao
         Password password = serializeJSONToPasswordObject(jsonFromFS);
         password.setPasswordText(EncryptUtils.decryptStringWithAES(salt, masterPassword, password.getPasswordText()));
         return password;
+    }
+    
+    public void deletePassword(String key){
+        File f = new File(BASE_DIR, key);
+        f.delete();
+    }
+    
+    public List<Password> getAllPasswords() throws IOException, ParseException{
+        ArrayList<Password> toReturn = new ArrayList<>();
+        File[] allFiles = BASE_DIR.listFiles();
+        for(File f : allFiles){
+            if(!f.getName().equals(".salt")){
+                toReturn.add(serializeJSONToPasswordObject(readFileAsString(f)));
+            }
+        }
+        return toReturn;
     }
 
     private String deserializePasswordObjectToJSON(Password password)
