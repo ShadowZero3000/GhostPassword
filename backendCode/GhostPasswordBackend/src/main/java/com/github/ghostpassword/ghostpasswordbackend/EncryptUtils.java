@@ -5,7 +5,7 @@ import org.springframework.security.crypto.encrypt.TextEncryptor;
 import org.springframework.security.crypto.keygen.KeyGenerators;
 
 /**
- *
+ * Encryption helper class.
  * @author udeyoje
  */
 public class EncryptUtils
