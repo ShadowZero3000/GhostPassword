@@ -52,7 +52,7 @@ public class EncryptUtilsTest
     public void testEncyptStringWithAES()
     {
         System.out.println("encyptStringWithAES");
-        final String salt = KeyGenerators.string().generateKey();
+        final String salt = EncryptUtils.generateSalt();
         String password = "test";
         String toEncrypt = "thisisatest";
         String cypherText = EncryptUtils.encryptStringWithAES(salt, password, toEncrypt);     
