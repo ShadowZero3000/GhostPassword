@@ -14,7 +14,7 @@ public class Utils
     public static String calculateKey(String friendlyName){
         friendlyName = friendlyName.trim();
         friendlyName = friendlyName.replaceAll("\\Q \\E", "-");
-        friendlyName = friendlyName.replaceAll("!@#$%^&*()+\"", "_");
+        friendlyName = friendlyName.replaceAll("[!@#$%^&*()+\"]", "_");
         return friendlyName;
     }
 }
