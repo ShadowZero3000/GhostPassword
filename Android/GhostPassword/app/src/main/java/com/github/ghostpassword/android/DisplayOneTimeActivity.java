@@ -1,12 +1,17 @@
 package com.github.ghostpassword.android;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
+
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
 
 public class DisplayOneTimeActivity extends AppCompatActivity {
     public static final int REQUEST_CODE = 0;
@@ -18,6 +23,20 @@ public class DisplayOneTimeActivity extends AppCompatActivity {
         setContentView(R.layout.activity_display_one_time);
 
         txResult = (TextView) findViewById(R.id.textResult);
+
+        Button button = (Button) findViewById(R.id.callZxing);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                IntentIntegrator integrator = new IntentIntegrator(DisplayOneTimeActivity.this);
+                integrator.addExtra("SCAN_WIDTH", 640);
+                integrator.addExtra("SCAN_HEIGHT", 480);
+                integrator.addExtra("SCAN_MODE", "QR_CODE_MODE,PRODUCT_MODE");
+                //customize the prompt message before scanning
+                integrator.addExtra("PROMPT_MESSAGE", "Scanner Start!");
+                integrator.initiateScan(IntentIntegrator.PRODUCT_CODE_TYPES);
+            }
+        });
     }
 
     @Override
@@ -41,14 +60,25 @@ public class DisplayOneTimeActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
-
+/*
     public void callZxing(View view){
 
-    }
+    }*/
 
-    @Override
+/*    @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data){
 
+    }*/
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
+        AlertDialog.Builder builder = new AlertDialog.Builder(DisplayOneTimeActivity.this);
+        if (result != null) {
+            String contents = result.getContents();
+           txResult.setText(contents);
+        }
     }
+
 
 }
