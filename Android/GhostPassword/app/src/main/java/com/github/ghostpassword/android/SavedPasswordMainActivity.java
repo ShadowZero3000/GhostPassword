@@ -31,7 +31,7 @@ public class SavedPasswordMainActivity extends AppCompatActivity {
         synchronized (this) {
             BlueToothDao dao = new BlueToothDao();
             try {
-                dao.write("This is a string!");
+                dao.write("PER000t!!");
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {
