@@ -34,7 +34,11 @@ public class CheckAndInit extends AppCompatActivity {
 
     public void onSetup(View view) throws IOException, NoSuchAlgorithmException {
         System.out.println("Trying to init new password db...");
-        if(password.getText().toString().equals(confirm.getText().toString())){
+        if(PasswordService.isInited()){
+            Intent intent = new Intent(this, UnlockActivity.class);
+            startActivity(intent);
+        }
+        else if(password.getText().toString().equals(confirm.getText().toString())){
             System.out.println("Initing DB");
             PasswordService.init(password.getText().toString());
             Intent intent = new Intent(this, UnlockActivity.class);

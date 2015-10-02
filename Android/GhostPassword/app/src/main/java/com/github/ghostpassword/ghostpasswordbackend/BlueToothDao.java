@@ -13,13 +13,15 @@ import java.util.Set;
 
 /**
  * Created by udeyoje on 10/2/15.
+ *
+ * Good gosh, not thread safe. Call all methods from a synced block.
  */
 public class BlueToothDao {
 
     private OutputStream outputStream;
     private BluetoothSocket socket;
 
-    public BlueToothDao() {
+    public  BlueToothDao() {
         BluetoothAdapter blueAdapter = BluetoothAdapter.getDefaultAdapter();
         if (blueAdapter != null) {
             if (blueAdapter.isEnabled()) {
@@ -37,8 +39,9 @@ public class BlueToothDao {
                         socket = device.createRfcommSocketToServiceRecord(uuids[0].getUuid());
                         socket.connect();
                         outputStream = socket.getOutputStream();
-                    } catch (IOException e) {
+                    } catch (IOException | ArrayIndexOutOfBoundsException | IllegalStateException | NullPointerException e) {
                         e.printStackTrace();
+                        System.out.println("\n--------------------Could not connect to bluetooth device!---------------\n");
                         //TODO: error handling here -- display a message or something
                     }
 
@@ -56,7 +59,24 @@ public class BlueToothDao {
         if (outputStream == null) {
             System.out.println("Output stream is null.");
         }
+        outputStream.flush();
+        s = ':' + s + ':';
+        System.out.println("\n\tWriting string to bluetooth: " + s); //TODO: take this out!
         outputStream.write(s.getBytes());
+        outputStream.flush();
+        try{Thread.sleep(1000);}catch (Exception e){}
+    }
+
+    public void writeQR(String s) throws IOException {
+        if (outputStream == null) {
+            System.out.println("Output stream is null.");
+        }
+        outputStream.flush();
+        s = '-' + s + ':';
+        System.out.println("\n\tWriting string to bluetooth: " + s); //TODO: take this out!
+        outputStream.write(s.getBytes());
+        outputStream.flush();
+        try{Thread.sleep(1000);}catch (Exception e){}
     }
 
     public void close() {

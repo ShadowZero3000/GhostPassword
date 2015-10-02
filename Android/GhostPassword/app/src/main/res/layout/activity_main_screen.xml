@@ -34,4 +34,13 @@
         android:contentDescription="GhostPassword image"
         android:src="@drawable/ghost"
         />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Send"
+        android:id="@+id/button2"
+        android:layout_alignParentBottom="true"
+        android:layout_toStartOf="@+id/buttonSavedPass"
+        android:onClick="sendString" />
 </RelativeLayout>
