@@ -35,27 +35,14 @@ public class DisplayOneTimeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_display_one_time);
 
-        txResult = (TextView) findViewById(R.id.textResult);
-
-        try {
-            init();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        Button button = (Button) findViewById(R.id.callZxing);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                IntentIntegrator integrator = new IntentIntegrator(DisplayOneTimeActivity.this);
-                integrator.addExtra("SCAN_WIDTH", 640);
-                integrator.addExtra("SCAN_HEIGHT", 480);
-                integrator.addExtra("SCAN_MODE", "QR_CODE_MODE");
-                //customize the prompt message before scanning
-                integrator.addExtra("PROMPT_MESSAGE", "Scanner Start!");
-                integrator.initiateScan(IntentIntegrator.QR_CODE_TYPES);
-            }
-        });
-
+        //txResult = (TextView) findViewById(R.id.textResult);
+        IntentIntegrator integrator = new IntentIntegrator(DisplayOneTimeActivity.this);
+        integrator.addExtra("SCAN_WIDTH", 640);
+        integrator.addExtra("SCAN_HEIGHT", 480);
+        integrator.addExtra("SCAN_MODE", "QR_CODE_MODE");
+        //customize the prompt message before scanning
+        integrator.addExtra("PROMPT_MESSAGE", "Scanner Start!");
+        integrator.initiateScan(IntentIntegrator.QR_CODE_TYPES);
 
     }
 
@@ -80,6 +67,8 @@ public class DisplayOneTimeActivity extends AppCompatActivity {
                         dao.close();
                     }
                 }
+                Intent main = new Intent(this, MainScreen.class);
+                startActivity(main);
             }
         } else {
             Log.d("MainActivity", "Weird");
@@ -88,9 +77,5 @@ public class DisplayOneTimeActivity extends AppCompatActivity {
         }
     }
 
-
-    public void init() throws IOException {
-
-    }
 
 }
