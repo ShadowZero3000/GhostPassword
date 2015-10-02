@@ -22,6 +22,7 @@ import com.google.zxing.integration.android.IntentResult;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Set;
 
 public class DisplayOneTimeActivity extends AppCompatActivity {
@@ -38,6 +39,11 @@ public class DisplayOneTimeActivity extends AppCompatActivity {
 
         txResult = (TextView) findViewById(R.id.textResult);
 
+        try {
+            init();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         Button button = (Button) findViewById(R.id.callZxing);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -52,63 +58,9 @@ public class DisplayOneTimeActivity extends AppCompatActivity {
             }
         });
 
-        BluetoothAdapter blueAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (blueAdapter != null) {
-            if (blueAdapter.isEnabled()) {
-                Set<BluetoothDevice> bondedDevices = blueAdapter.getBondedDevices();
 
-                if(bondedDevices.size() > 0){
-                    BluetoothDevice[] devices = (BluetoothDevice[]) bondedDevices.toArray();
-                    BluetoothDevice device = devices[0];
-                    ParcelUuid[] uuids = device.getUuids();
-                    BluetoothSocket socket = null;
-                    try {
-                        socket = device.createRfcommSocketToServiceRecord(uuids[0].getUuid());
-                        socket.connect();
-                        outputStream = socket.getOutputStream();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-                }
-
-                Log.e("error", "No appropriate paired devices.");
-            }else{
-                Log.e("error", "Bluetooth is disabled.");
-            }
-        }
     }
 
-/*    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_display_one_time, menu);
-        return true;
-    }*/
-
-/*    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }*/
-/*
-    public void callZxing(View view){
-
-    }*/
-
-/*    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data){
-
-    }*/
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
@@ -134,7 +86,41 @@ public class DisplayOneTimeActivity extends AppCompatActivity {
     }
 
     public void write(String s) throws IOException {
+        if(outputStream == null){
+            System.out.println("Output stream is null.");
+        }
         outputStream.write(s.getBytes());
+    }
+
+    public void init() throws IOException{
+        BluetoothAdapter blueAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (blueAdapter != null) {
+            if (blueAdapter.isEnabled()) {
+                Set<BluetoothDevice> bondedDevices = blueAdapter.getBondedDevices();
+
+                if(bondedDevices.size() > 0){
+                    ArrayList<BluetoothDevice> devices = new ArrayList<>();
+                    for(BluetoothDevice device : bondedDevices){
+                        devices.add(device);
+                    }
+                    BluetoothDevice device = devices.get(0);
+                    ParcelUuid[] uuids = device.getUuids();
+                    BluetoothSocket socket = null;
+                    try {
+                        socket = device.createRfcommSocketToServiceRecord(uuids[0].getUuid());
+                        socket.connect();
+                        outputStream = socket.getOutputStream();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                } else {
+                    Log.e("error", "No appropriate paired devices.");
+                }
+            }else{
+                Log.e("error", "Bluetooth is disabled.");
+            }
+        }
     }
 
 }
