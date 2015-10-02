@@ -10,7 +10,7 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="call zxing"
+        android:text="Capture QR Code"
         android:id="@+id/callZxing"
         android:onClick="callZxing"
         android:layout_alignParentBottom="true"
