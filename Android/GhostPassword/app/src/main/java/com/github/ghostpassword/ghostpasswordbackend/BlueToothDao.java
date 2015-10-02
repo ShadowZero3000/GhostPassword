@@ -19,7 +19,7 @@ public class BlueToothDao {
     private OutputStream outputStream;
     private BluetoothSocket socket;
 
-    public BlueToothDao() {
+    public  BlueToothDao() {
         BluetoothAdapter blueAdapter = BluetoothAdapter.getDefaultAdapter();
         if (blueAdapter != null) {
             if (blueAdapter.isEnabled()) {
@@ -34,11 +34,14 @@ public class BlueToothDao {
                     ParcelUuid[] uuids = device.getUuids();
                     BluetoothSocket socket = null;
                     try {
+                        //socket = device.createInsecureRfcommSocketToServiceRecord(uuids[0].getUuid());
+                        //socket.
                         socket = device.createRfcommSocketToServiceRecord(uuids[0].getUuid());
                         socket.connect();
                         outputStream = socket.getOutputStream();
-                    } catch (IOException e) {
+                    } catch (IOException | ArrayIndexOutOfBoundsException | IllegalStateException | NullPointerException e) {
                         e.printStackTrace();
+                        System.out.println("\n--------------------Could not connect to bluetooth device!---------------\n");
                         //TODO: error handling here -- display a message or something
                     }
 
@@ -56,6 +59,7 @@ public class BlueToothDao {
         if (outputStream == null) {
             System.out.println("Output stream is null.");
         }
+        System.out.println("\n\tWriting string to bluetooth: " + s); //TODO: take this out!
         outputStream.write(s.getBytes());
     }
 

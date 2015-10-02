@@ -6,11 +6,20 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.TextView;
+
+import com.github.ghostpassword.ghostpasswordbackend.PasswordServiceHolder;
+import com.github.ghostpassword.ghostpasswordbackend.domain.Password;
+
+import java.util.List;
 
 public class SavedPasswordMainActivity extends AppCompatActivity {
 
+    private ListView list = null;
 
-    public void onCreateNew(View view){
+    public void onCreateNew(View view) {
         System.out.println("Starting add new password menu.");
         Intent intent = new Intent(this, AddNewPasswordActivity.class);
         startActivity(intent);
@@ -20,6 +29,19 @@ public class SavedPasswordMainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_saved_password_main);
+        list = (ListView) findViewById(R.id.listView);
+        try {
+            List<Password> passwords = PasswordServiceHolder.getPasswordService().getAllPasswordsOrderByAlphabetical();
+            String[] array = new String[passwords.size()];
+            for (int i = 0; i < passwords.size(); i++) {
+                array[i] = passwords.get(i).getFriendlyName();
+            }
+            ArrayAdapter listAdaptor = new ArrayAdapter(getBaseContext(), R.layout.activity_saved_password_main, array);
+            list.setAdapter(listAdaptor);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+
+        }
     }
 
     @Override
