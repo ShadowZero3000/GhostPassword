@@ -9,7 +9,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import org.apache.commons.io.IOUtils;
 import org.json.simple.JSONObject;
@@ -113,9 +112,21 @@ public class PasswordDao
 
     }
 
-    public boolean checkPassword(String masterPassword)
+    public boolean isInited()
     {
-        throw new UnsupportedOperationException("Not done yet");//TODO: come back to this
+        return TEST_FILE.exists();
+    }
+
+    public void init(String newMaster) throws IOException
+    {
+        writeStringToFile(TEST_FILE, EncryptUtils.hashPassword(newMaster));
+    }
+
+    public boolean checkPassword(String masterPassword) throws IOException
+    {
+        String passHash = EncryptUtils.hashPassword(masterPassword);
+        String fromFile = readFileAsString(TEST_FILE).trim();
+        return passHash.equals(fromFile);
     }
 
     public boolean passwordExists(String key)
@@ -151,7 +162,7 @@ public class PasswordDao
         File[] allFiles = BASE_DIR.listFiles();
         for (File f : allFiles)
         {
-            if (!f.getName().equals(".salt"))
+            if (!f.getName().equals(".salt") && !f.getName().equals(".passTest"))
             {
                 toReturn.add(serializeJSONToPasswordObject(readFileAsString(f)));
             }

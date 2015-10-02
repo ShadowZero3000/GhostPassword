@@ -34,3 +34,4 @@ proguard/
 Android/GhostPassword/.idea
 
 *.iml
+/Android/GhostPassword/.nb-gradle/
