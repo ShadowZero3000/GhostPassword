@@ -10,9 +10,11 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.github.ghostpassword.ghostpasswordbackend.BlueToothDao;
 import com.github.ghostpassword.ghostpasswordbackend.PasswordServiceHolder;
 import com.github.ghostpassword.ghostpasswordbackend.domain.Password;
 
+import java.io.IOException;
 import java.util.List;
 
 public class SavedPasswordMainActivity extends AppCompatActivity {
@@ -25,11 +27,26 @@ public class SavedPasswordMainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    public void sendPEROOT(View view){
+        synchronized (this) {
+            BlueToothDao dao = new BlueToothDao();
+            try {
+                dao.write("This is a string!");
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                dao.close();
+            }
+        }
+
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_saved_password_main);
-        list = (ListView) findViewById(R.id.listView);
+
+       /* list = (ListView) findViewById(R.id.listView);
         try {
             List<Password> passwords = PasswordServiceHolder.getPasswordService().getAllPasswordsOrderByAlphabetical();
             String[] array = new String[passwords.size()];
@@ -41,7 +58,7 @@ public class SavedPasswordMainActivity extends AppCompatActivity {
         } catch (Exception e) {
             throw new RuntimeException(e);
 
-        }
+        }*/
     }
 
     @Override
