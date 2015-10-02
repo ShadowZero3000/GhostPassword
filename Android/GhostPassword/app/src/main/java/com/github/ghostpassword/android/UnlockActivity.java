@@ -9,12 +9,12 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.github.ghostpassword.ghostpasswordbackend.PasswordService;
+import com.github.ghostpassword.ghostpasswordbackend.PasswordServiceHolder;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
-import java.util.NoSuchElementException;
 
-public class DisplaySavedPassScreenActivity extends AppCompatActivity {
+public class UnlockActivity extends AppCompatActivity {
 
     private TextView password;
     private TextView errorField;
@@ -23,6 +23,8 @@ public class DisplaySavedPassScreenActivity extends AppCompatActivity {
         System.out.println("Trying to unlock...");
         if(PasswordService.checkPassword(password.getText().toString())){
             System.out.println("Unlocking...");
+            PasswordService pwService = new PasswordService(password.getText().toString());
+            PasswordServiceHolder.setPasswordService(pwService);
             Intent intent = new Intent(this, SavedPasswordMainActivity.class);
             startActivity(intent);
 
@@ -36,7 +38,7 @@ public class DisplaySavedPassScreenActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_display_saved_pass_screen);
+        setContentView(R.layout.unlock_screen);
         password = (TextView)findViewById(R.id.masterpass);
         errorField =(TextView)findViewById(R.id.errorLabel);
     }

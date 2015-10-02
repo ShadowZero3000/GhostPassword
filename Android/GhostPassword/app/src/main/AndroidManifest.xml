@@ -25,7 +25,7 @@
             android:label="@string/title_activity_display_one_time" >
         </activity>
         <activity
-            android:name=".DisplaySavedPassScreenActivity"
+            android:name=".UnlockActivity"
             android:label="@string/title_activity_display_saved_pass_screen" >
         </activity>
         <activity
@@ -35,6 +35,10 @@
         <activity
             android:name=".SavedPasswordMainActivity"
             android:label="@string/title_activity_saved_password_main" >
+        </activity>
+        <activity
+            android:name=".AddNewPasswordActivity"
+            android:label="@string/title_activity_add_new_password" >
         </activity>
     </application>
 

@@ -24,7 +24,7 @@ public class CheckAndInit extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_check_and_init);
         if(PasswordService.isInited()){
-            Intent intent = new Intent(this, DisplaySavedPassScreenActivity.class);
+            Intent intent = new Intent(this, UnlockActivity.class);
             startActivity(intent);
         }
         password = (TextView)findViewById(R.id.password);
@@ -37,8 +37,9 @@ public class CheckAndInit extends AppCompatActivity {
         if(password.getText().toString().equals(confirm.getText().toString())){
             System.out.println("Initing DB");
             PasswordService.init(password.getText().toString());
-            Intent intent = new Intent(this, DisplaySavedPassScreenActivity.class);
+            Intent intent = new Intent(this, UnlockActivity.class);
             startActivity(intent);
+
         } else {
             System.out.println("Passwords don't match." + password.getText().toString());
             errorField.setText("Passwords don't match. Try again.");

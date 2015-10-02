@@ -14,7 +14,7 @@
     <statePointEntry>
       <state      
         class = "com.android.tools.idea.editors.navigation.model.ActivityState"      
-        className = "com.github.ghostpassword.android.DisplaySavedPassScreenActivity"/>
+        className = "com.github.ghostpassword.android.UnlockActivity"/>
       <point      
         x = "328"      
         y = "780"/>
