@@ -6,23 +6,4 @@
     android:paddingBottom="@dimen/activity_vertical_margin"
     tools:context="com.github.ghostpassword.android.DisplayOneTimeActivity">
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Capture QR Code"
-        android:id="@+id/callZxing"
-        android:onClick="callZxing"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="qr code should show up here"
-        android:id="@+id/textResult"
-        android:layout_above="@+id/callZxing"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentStart="true" />
-
 </RelativeLayout>

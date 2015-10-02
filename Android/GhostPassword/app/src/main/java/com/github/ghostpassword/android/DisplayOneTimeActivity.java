@@ -35,27 +35,14 @@ public class DisplayOneTimeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_display_one_time);
 
-        txResult = (TextView) findViewById(R.id.textResult);
-
-        try {
-            init();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        Button button = (Button) findViewById(R.id.callZxing);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                IntentIntegrator integrator = new IntentIntegrator(DisplayOneTimeActivity.this);
-                integrator.addExtra("SCAN_WIDTH", 640);
-                integrator.addExtra("SCAN_HEIGHT", 480);
-                integrator.addExtra("SCAN_MODE", "QR_CODE_MODE");
-                //customize the prompt message before scanning
-                integrator.addExtra("PROMPT_MESSAGE", "Scanner Start!");
-                integrator.initiateScan(IntentIntegrator.QR_CODE_TYPES);
-            }
-        });
-
+        //txResult = (TextView) findViewById(R.id.textResult);
+        IntentIntegrator integrator = new IntentIntegrator(DisplayOneTimeActivity.this);
+        integrator.addExtra("SCAN_WIDTH", 640);
+        integrator.addExtra("SCAN_HEIGHT", 480);
+        integrator.addExtra("SCAN_MODE", "QR_CODE_MODE");
+        //customize the prompt message before scanning
+        integrator.addExtra("PROMPT_MESSAGE", "Scanner Start!");
+        integrator.initiateScan(IntentIntegrator.QR_CODE_TYPES);
 
     }
 
@@ -64,20 +51,24 @@ public class DisplayOneTimeActivity extends AppCompatActivity {
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
         IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
         if (result != null) {
-            if(result.getContents() == null) {
+            if (result.getContents() == null) {
                 Log.d("MainActivity", "Cancelled scan");
                 Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show();
             } else {
                 Log.d("MainActivity", "Scanned");
                 Toast.makeText(this, "Scanned: " + result.getContents(), Toast.LENGTH_LONG).show();
-                BlueToothDao dao = new BlueToothDao();
-                try {
-                    dao.write(result.getContents());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } finally {
-                    dao.close();
+                synchronized (this) {
+                    BlueToothDao dao = new BlueToothDao();
+                    try {
+                        dao.writeQR(result.getContents());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } finally {
+                        dao.close();
+                    }
                 }
+                Intent main = new Intent(this, MainScreen.class);
+                startActivity(main);
             }
         } else {
             Log.d("MainActivity", "Weird");
@@ -86,10 +77,5 @@ public class DisplayOneTimeActivity extends AppCompatActivity {
         }
     }
 
-
-
-    public void init() throws IOException{
-
-    }
 
 }

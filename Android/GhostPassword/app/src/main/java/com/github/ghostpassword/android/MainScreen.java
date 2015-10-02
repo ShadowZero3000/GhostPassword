@@ -7,6 +7,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.github.ghostpassword.ghostpasswordbackend.BlueToothDao;
+
+import java.io.IOException;
+
 public class MainScreen extends AppCompatActivity {
 
     @Override
@@ -15,6 +19,20 @@ public class MainScreen extends AppCompatActivity {
         setContentView(R.layout.activity_main_screen);
         //this is an ugly hack
         System.setProperty("com.github.ghostpassword.filedir", getFilesDir().getAbsolutePath());
+    }
+
+    public void sendString(View view) {
+        synchronized (this) {
+            BlueToothDao dao = new BlueToothDao();
+            try {
+                dao.write("This is a string!");
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                dao.close();
+            }
+        }
+
     }
 
     @Override
@@ -39,14 +57,18 @@ public class MainScreen extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    /** Called when the user clicks the Send button */
+    /**
+     * Called when the user clicks the Send button
+     */
     public void gotoOnetimeScreen(View view) {
         // Do something in response to button
         Intent intent = new Intent(this, DisplayOneTimeActivity.class);
         startActivity(intent);
     }
 
-    /** Called when the user clicks the Send button */
+    /**
+     * Called when the user clicks the Send button
+     */
     public void gotoSavedPassScreen(View view) {
         // Do something in response to button
         Intent intent = new Intent(this, CheckAndInit.class);
