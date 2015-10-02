@@ -1,5 +1,8 @@
 package com.github.ghostpassword.ghostpasswordbackend;
 
+import android.content.Context;
+import android.os.Environment;
+
 import com.github.ghostpassword.ghostpasswordbackend.domain.Password;
 import java.io.File;
 import java.io.FileInputStream;
@@ -29,10 +32,11 @@ public class PasswordDao
      */
     private static PasswordDao instance;
 
+
     /**
      * Base directory for this app.
      */
-    public static final File BASE_DIR = new File(".", "ghostpass");// the dot file (.) parent may not be correct on this; trial and error probably neede
+    public static final File BASE_DIR = new File(Environment.getDataDirectory(), "ghostpass");
 
     /**
      * Salt file for this app.
@@ -49,7 +53,7 @@ public class PasswordDao
      */
     public static final String DEFAULT_CHARSET = "UTF-8";
 
-    public static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX");
+    public static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
 
     /**
      * Salt string.
@@ -121,10 +125,12 @@ public class PasswordDao
 
     public static void init(String newMaster) throws IOException, NoSuchAlgorithmException
     {
+        System.out.println("BASE_DIR: " + BASE_DIR.getAbsolutePath());
         if (!BASE_DIR.exists())
         {
             BASE_DIR.mkdirs();
         }
+        TEST_FILE.createNewFile();
         writeStringToFile(TEST_FILE, EncryptUtils.hashPassword(newMaster));
     }
 
