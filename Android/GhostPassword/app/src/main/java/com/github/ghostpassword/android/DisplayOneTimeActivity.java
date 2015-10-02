@@ -4,11 +4,13 @@ import android.app.AlertDialog;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
@@ -31,22 +33,22 @@ public class DisplayOneTimeActivity extends AppCompatActivity {
                 IntentIntegrator integrator = new IntentIntegrator(DisplayOneTimeActivity.this);
                 integrator.addExtra("SCAN_WIDTH", 640);
                 integrator.addExtra("SCAN_HEIGHT", 480);
-                integrator.addExtra("SCAN_MODE", "QR_CODE_MODE,PRODUCT_MODE");
+                integrator.addExtra("SCAN_MODE", "QR_CODE_MODE");
                 //customize the prompt message before scanning
                 integrator.addExtra("PROMPT_MESSAGE", "Scanner Start!");
-                integrator.initiateScan(IntentIntegrator.PRODUCT_CODE_TYPES);
+                integrator.initiateScan(IntentIntegrator.QR_CODE_TYPES);
             }
         });
     }
 
-    @Override
+/*    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_display_one_time, menu);
         return true;
-    }
+    }*/
 
-    @Override
+/*    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
@@ -59,7 +61,7 @@ public class DisplayOneTimeActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
-    }
+    }*/
 /*
     public void callZxing(View view){
 
@@ -73,12 +75,19 @@ public class DisplayOneTimeActivity extends AppCompatActivity {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
         IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
-        AlertDialog.Builder builder = new AlertDialog.Builder(DisplayOneTimeActivity.this);
         if (result != null) {
-            String contents = result.getContents();
-           txResult.setText(contents);
+            if(result.getContents() == null) {
+                Log.d("MainActivity", "Cancelled scan");
+                Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show();
+            } else {
+                Log.d("MainActivity", "Scanned");
+                Toast.makeText(this, "Scanned: " + result.getContents(), Toast.LENGTH_LONG).show();
+            }
+        } else {
+            Log.d("MainActivity", "Weird");
+            // This is important, otherwise the result will not be passed to the fragment
+            super.onActivityResult(requestCode, resultCode, intent);
         }
     }
-
 
 }

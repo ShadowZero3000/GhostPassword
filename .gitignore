@@ -32,3 +32,5 @@ proguard/
 
 */.idea/
 Android/GhostPassword/.idea
+
+*.iml
