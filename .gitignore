@@ -35,3 +35,4 @@ Android/GhostPassword/.idea
 
 *.iml
 /Android/GhostPassword/.nb-gradle/
+/Android/GhostPassword/app/target/

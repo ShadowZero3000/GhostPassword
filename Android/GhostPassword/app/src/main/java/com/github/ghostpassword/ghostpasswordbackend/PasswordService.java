@@ -3,6 +3,7 @@ package com.github.ghostpassword.ghostpasswordbackend;
 import static com.github.ghostpassword.ghostpasswordbackend.PasswordDao.TEST_FILE;
 import com.github.ghostpassword.ghostpasswordbackend.domain.Password;
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -31,12 +32,12 @@ public class PasswordService
         return PasswordDao.isInited();
     }
 
-    public static void init(String newMaster) throws IOException
+    public static void init(String newMaster) throws IOException, NoSuchAlgorithmException
     {
         PasswordDao.init(newMaster);
     }
 
-    public static boolean checkPassword(String masterPassword) throws IOException
+    public static boolean checkPassword(String masterPassword) throws IOException, NoSuchAlgorithmException
     {
         return PasswordDao.checkPassword(masterPassword);
     }

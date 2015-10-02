@@ -1,6 +1,8 @@
 package com.github.ghostpassword.ghostpasswordbackend;
 
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import org.springframework.security.crypto.encrypt.Encryptors;
 import org.springframework.security.crypto.encrypt.TextEncryptor;
 import org.springframework.security.crypto.keygen.KeyGenerators;
@@ -26,14 +28,16 @@ public class EncryptUtils
 
     /**
      * For hashing the master password
+     *
      * @param password
-     * @return 
+     * @return
      */
-    public static String hashPassword(String password)
+    public static String hashPassword(String password) throws NoSuchAlgorithmException, UnsupportedEncodingException
     {
-        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        String hashedPassword = passwordEncoder.encode(password);
-        return hashedPassword;
+        MessageDigest md = MessageDigest.getInstance("SHA-256");
+        md.update(password.getBytes("UTF-8")); // Change this to "UTF-16" if needed
+        byte[] digest = md.digest();
+        return new String(digest);
     }
 
     /**

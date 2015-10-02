@@ -10,10 +10,14 @@ import android.widget.TextView;
 
 import com.github.ghostpassword.ghostpasswordbackend.PasswordService;
 
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+
 public class CheckAndInit extends AppCompatActivity {
 
-    TextView password;
-    TextView confirm;
+    private TextView password;
+    private TextView confirm;
+    private TextView errorField;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,11 +29,22 @@ public class CheckAndInit extends AppCompatActivity {
         }
         password = (TextView)findViewById(R.id.password);
         confirm = (TextView)findViewById(R.id.confirm);
+        errorField =(TextView)findViewById(R.id.textView5);
     }
 
-    public void onSetup(View view){
+    public void onSetup(View view) throws IOException, NoSuchAlgorithmException {
         System.out.println("Trying to init new password db...");
-
+        if(password.getText().equals(confirm.getText())){
+            System.out.println("Initing DB");
+            PasswordService.init(password.getText().toString());
+            Intent intent = new Intent(this, DisplaySavedPassScreenActivity.class);
+            startActivity(intent);
+        } else {
+            System.out.println("Passwords don't match.");
+            errorField.setText("Passwords don't match. Try again.");
+            password.setText("");
+            confirm.setText("");
+        }
 
     }
 

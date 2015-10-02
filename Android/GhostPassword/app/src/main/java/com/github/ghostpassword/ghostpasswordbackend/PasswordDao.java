@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,7 +50,7 @@ public class PasswordDao
     public static final String DEFAULT_CHARSET = "UTF-8";
 
     public static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX");
-    
+
     /**
      * Salt string.
      */
@@ -82,7 +83,8 @@ public class PasswordDao
     private PasswordDao() throws IOException
     {
         boolean regenSalt = false;
-        if(!BASE_DIR.exists()){
+        if (!BASE_DIR.exists())
+        {
             BASE_DIR.mkdirs();
             regenSalt = true;
         }
@@ -117,12 +119,16 @@ public class PasswordDao
         return TEST_FILE.exists();
     }
 
-    public static void init(String newMaster) throws IOException
+    public static void init(String newMaster) throws IOException, NoSuchAlgorithmException
     {
+        if (!BASE_DIR.exists())
+        {
+            BASE_DIR.mkdirs();
+        }
         writeStringToFile(TEST_FILE, EncryptUtils.hashPassword(newMaster));
     }
 
-    public static boolean checkPassword(String masterPassword) throws IOException
+    public static boolean checkPassword(String masterPassword) throws IOException, NoSuchAlgorithmException
     {
         String passHash = EncryptUtils.hashPassword(masterPassword);
         String fromFile = readFileAsString(TEST_FILE).trim();
@@ -204,13 +210,14 @@ public class PasswordDao
         }
         if (jsonObject.get("lastAccessed") != null)
         {
-            toReturn.setLastAccessed(sdf.parse((String)jsonObject.get("lastAccessed")));
+            toReturn.setLastAccessed(sdf.parse((String) jsonObject.get("lastAccessed")));
         }
         return toReturn;
     }
 
     private synchronized static void writeStringToFile(File f, String string) throws IOException
     {
+        System.out.println("Writing: '" + string + "' to " + f.getName());
         OutputStream os = null;
         try
         {
