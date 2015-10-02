@@ -16,6 +16,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.github.ghostpassword.ghostpasswordbackend.BlueToothDao;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
@@ -28,9 +29,6 @@ import java.util.Set;
 public class DisplayOneTimeActivity extends AppCompatActivity {
     public static final int REQUEST_CODE = 0;
     private TextView txResult;
-
-    private OutputStream outputStream;
-    private InputStream inStream;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,10 +70,13 @@ public class DisplayOneTimeActivity extends AppCompatActivity {
             } else {
                 Log.d("MainActivity", "Scanned");
                 Toast.makeText(this, "Scanned: " + result.getContents(), Toast.LENGTH_LONG).show();
+                BlueToothDao dao = new BlueToothDao();
                 try {
-                    write(result.getContents());
+                    dao.write(result.getContents());
                 } catch (IOException e) {
                     e.printStackTrace();
+                } finally {
+                    dao.close();
                 }
             }
         } else {
@@ -85,42 +86,10 @@ public class DisplayOneTimeActivity extends AppCompatActivity {
         }
     }
 
-    public void write(String s) throws IOException {
-        if(outputStream == null){
-            System.out.println("Output stream is null.");
-        }
-        outputStream.write(s.getBytes());
-    }
+
 
     public void init() throws IOException{
-        BluetoothAdapter blueAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (blueAdapter != null) {
-            if (blueAdapter.isEnabled()) {
-                Set<BluetoothDevice> bondedDevices = blueAdapter.getBondedDevices();
 
-                if(bondedDevices.size() > 0){
-                    ArrayList<BluetoothDevice> devices = new ArrayList<>();
-                    for(BluetoothDevice device : bondedDevices){
-                        devices.add(device);
-                    }
-                    BluetoothDevice device = devices.get(0);
-                    ParcelUuid[] uuids = device.getUuids();
-                    BluetoothSocket socket = null;
-                    try {
-                        socket = device.createRfcommSocketToServiceRecord(uuids[0].getUuid());
-                        socket.connect();
-                        outputStream = socket.getOutputStream();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-                } else {
-                    Log.e("error", "No appropriate paired devices.");
-                }
-            }else{
-                Log.e("error", "Bluetooth is disabled.");
-            }
-        }
     }
 
 }
