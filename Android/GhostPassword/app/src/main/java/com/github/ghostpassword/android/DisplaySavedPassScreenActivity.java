@@ -4,8 +4,19 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+
+import com.github.ghostpassword.ghostpasswordbackend.PasswordService;
 
 public class DisplaySavedPassScreenActivity extends AppCompatActivity {
+
+    //private PasswordService passwordService = new PasswordService()
+
+
+    public void onUnlockAttempt(View view){
+        System.out.println("Trying to unlock...");
+
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -21,7 +21,7 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="saved"
+        android:text="Saved Passwords"
         android:id="@+id/buttonSavedPass"
         android:layout_alignBottom="@+id/buttonOneTime"
         android:layout_alignParentEnd="true"
