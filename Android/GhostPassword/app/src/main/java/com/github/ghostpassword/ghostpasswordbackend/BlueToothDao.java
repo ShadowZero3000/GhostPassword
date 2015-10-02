@@ -57,7 +57,6 @@ public class BlueToothDao {
         if (outputStream == null) {
             System.out.println("Output stream is null.");
         }
-        s = "Abcdefgh";
         System.out.println("\n\tWriting string to bluetooth: " + s); //TODO: take this out!
         outputStream.flush();
         outputStream.write(s.getBytes());
