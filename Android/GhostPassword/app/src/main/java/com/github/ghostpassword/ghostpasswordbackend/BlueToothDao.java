@@ -34,8 +34,6 @@ public class BlueToothDao {
                     ParcelUuid[] uuids = device.getUuids();
                     BluetoothSocket socket = null;
                     try {
-                        //socket = device.createInsecureRfcommSocketToServiceRecord(uuids[0].getUuid());
-                        //socket.
                         socket = device.createRfcommSocketToServiceRecord(uuids[0].getUuid());
                         socket.connect();
                         outputStream = socket.getOutputStream();
@@ -59,8 +57,12 @@ public class BlueToothDao {
         if (outputStream == null) {
             System.out.println("Output stream is null.");
         }
+        s = "Abcdefgh";
         System.out.println("\n\tWriting string to bluetooth: " + s); //TODO: take this out!
+        outputStream.flush();
         outputStream.write(s.getBytes());
+        outputStream.flush();
+        try{Thread.sleep(1000);}catch (Exception e){}
     }
 
     public void close() {

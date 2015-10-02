@@ -21,14 +21,16 @@ public class MainScreen extends AppCompatActivity {
         System.setProperty("com.github.ghostpassword.filedir", getFilesDir().getAbsolutePath());
     }
 
-    public void sendString(View view){
-        BlueToothDao dao = new BlueToothDao();
-        try {
-            dao.write("This is a string!");
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            dao.close();
+    public void sendString(View view) {
+        synchronized (this) {
+            BlueToothDao dao = new BlueToothDao();
+            try {
+                dao.write("This is a string!");
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                dao.close();
+            }
         }
 
     }
@@ -55,14 +57,18 @@ public class MainScreen extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    /** Called when the user clicks the Send button */
+    /**
+     * Called when the user clicks the Send button
+     */
     public void gotoOnetimeScreen(View view) {
         // Do something in response to button
         Intent intent = new Intent(this, DisplayOneTimeActivity.class);
         startActivity(intent);
     }
 
-    /** Called when the user clicks the Send button */
+    /**
+     * Called when the user clicks the Send button
+     */
     public void gotoSavedPassScreen(View view) {
         // Do something in response to button
         Intent intent = new Intent(this, CheckAndInit.class);
