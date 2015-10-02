@@ -13,6 +13,8 @@ public class MainScreen extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_screen);
+        //this is an ugly hack
+        System.setProperty("com.github.ghostpassword.filedir", getFilesDir().getAbsolutePath());
     }
 
     @Override

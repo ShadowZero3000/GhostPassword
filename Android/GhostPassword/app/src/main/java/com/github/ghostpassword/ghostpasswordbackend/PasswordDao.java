@@ -1,8 +1,5 @@
 package com.github.ghostpassword.ghostpasswordbackend;
 
-import android.content.Context;
-import android.os.Environment;
-
 import com.github.ghostpassword.ghostpasswordbackend.domain.Password;
 import java.io.File;
 import java.io.FileInputStream;
@@ -36,7 +33,7 @@ public class PasswordDao
     /**
      * Base directory for this app.
      */
-    public static final File BASE_DIR = new File(Environment.getDataDirectory(), "ghostpass");
+    public static final File BASE_DIR = new File(System.getProperty("com.github.ghostpassword.filedir"), "ghostpass");//ugly
 
     /**
      * Salt file for this app.
