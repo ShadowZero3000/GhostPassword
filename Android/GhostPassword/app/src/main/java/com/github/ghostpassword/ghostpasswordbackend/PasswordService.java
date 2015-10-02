@@ -1,5 +1,6 @@
 package com.github.ghostpassword.ghostpasswordbackend;
 
+import static com.github.ghostpassword.ghostpasswordbackend.PasswordDao.TEST_FILE;
 import com.github.ghostpassword.ghostpasswordbackend.domain.Password;
 import java.io.IOException;
 import java.util.Collections;
@@ -17,12 +18,27 @@ public class PasswordService
 {
 
     private final String masterPassword;
-    private PasswordDao dao;
+    private static PasswordDao dao;
 
     public PasswordService(String masterPassword) throws IOException
     {
         this.masterPassword = masterPassword;
         dao = PasswordDao.getInstance();
+    }
+
+    public static boolean isInited()
+    {
+        return PasswordDao.isInited();
+    }
+
+    public static void init(String newMaster) throws IOException
+    {
+        PasswordDao.init(newMaster);
+    }
+
+    public static boolean checkPassword(String masterPassword) throws IOException
+    {
+        return PasswordDao.checkPassword(masterPassword);
     }
 
     public Password savePassword(String friendlyName, String passwordText) throws IOException, IllegalArgumentException
@@ -96,7 +112,7 @@ public class PasswordService
             @Override
             public int compare(Password o1, Password o2)
             {
-                return o1.getFriendlyName().compareTo(o2.getFriendlyName());                
+                return o1.getFriendlyName().compareTo(o2.getFriendlyName());
             }
         };
         List<Password> passwords = dao.getAllPasswords();

@@ -6,19 +6,37 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 
-public class MainScreen extends AppCompatActivity {
+import com.github.ghostpassword.ghostpasswordbackend.PasswordService;
+
+public class CheckAndInit extends AppCompatActivity {
+
+    TextView password;
+    TextView confirm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main_screen);
+        setContentView(R.layout.activity_check_and_init);
+        if(PasswordService.isInited()){
+            Intent intent = new Intent(this, DisplaySavedPassScreenActivity.class);
+            startActivity(intent);
+        }
+        password = (TextView)findViewById(R.id.password);
+        confirm = (TextView)findViewById(R.id.confirm);
+    }
+
+    public void onSetup(View view){
+        System.out.println("Trying to init new password db...");
+
+
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main_screen, menu);
+        getMenuInflater().inflate(R.menu.menu_check_and_init, menu);
         return true;
     }
 
@@ -35,19 +53,5 @@ public class MainScreen extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    /** Called when the user clicks the Send button */
-    public void gotoOnetimeScreen(View view) {
-        // Do something in response to button
-        Intent intent = new Intent(this, DisplayOneTimeActivity.class);
-        startActivity(intent);
-    }
-
-    /** Called when the user clicks the Send button */
-    public void gotoSavedPassScreen(View view) {
-        // Do something in response to button
-        Intent intent = new Intent(this, CheckAndInit.class);
-        startActivity(intent);
     }
 }

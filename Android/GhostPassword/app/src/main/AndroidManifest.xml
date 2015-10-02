@@ -3,6 +3,7 @@
     package="com.github.ghostpassword.android" >
 
     <uses-feature android:name="android.hardware.camera" />
+
     <uses-permission android:name="android.permission.BLUETOOTH" />
 
     <application
@@ -26,6 +27,10 @@
         <activity
             android:name=".DisplaySavedPassScreenActivity"
             android:label="@string/title_activity_display_saved_pass_screen" >
+        </activity>
+        <activity
+            android:name=".CheckAndInit"
+            android:label="@string/title_activity_check_and_init" >
         </activity>
     </application>
 

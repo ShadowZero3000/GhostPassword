@@ -112,17 +112,17 @@ public class PasswordDao
 
     }
 
-    public boolean isInited()
+    public static boolean isInited()
     {
         return TEST_FILE.exists();
     }
 
-    public void init(String newMaster) throws IOException
+    public static void init(String newMaster) throws IOException
     {
         writeStringToFile(TEST_FILE, EncryptUtils.hashPassword(newMaster));
     }
 
-    public boolean checkPassword(String masterPassword) throws IOException
+    public static boolean checkPassword(String masterPassword) throws IOException
     {
         String passHash = EncryptUtils.hashPassword(masterPassword);
         String fromFile = readFileAsString(TEST_FILE).trim();
