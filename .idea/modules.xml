@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/Android/GhostPassword/app/build/intermediates/exploded-aar/com.android.support/multidex/1.0.1/1.0.1.iml" filepath="$PROJECT_DIR$/Android/GhostPassword/app/build/intermediates/exploded-aar/com.android.support/multidex/1.0.1/1.0.1.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Android/GhostPassword/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.0.1/23.0.1.iml" filepath="$PROJECT_DIR$/Android/GhostPassword/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.0.1/23.0.1.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Android/GhostPassword/app/build/intermediates/exploded-aar/com.android.support/support-v4/23.0.1/23.0.1.iml" filepath="$PROJECT_DIR$/Android/GhostPassword/app/build/intermediates/exploded-aar/com.android.support/support-v4/23.0.1/23.0.1.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Android/GhostPassword/app/build/intermediates/exploded-aar/com.journeyapps/zxing-android-embedded/3.0.2/3.0.2.iml" filepath="$PROJECT_DIR$/Android/GhostPassword/app/build/intermediates/exploded-aar/com.journeyapps/zxing-android-embedded/3.0.2/3.0.2.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Android/GhostPassword/app/src/androidTest/androidTest.iml" filepath="$PROJECT_DIR$/Android/GhostPassword/app/src/androidTest/androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Android/GhostPassword/app/build/generated/source/buildConfig/androidTest/androidTest1.iml" filepath="$PROJECT_DIR$/Android/GhostPassword/app/build/generated/source/buildConfig/androidTest/androidTest1.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Android/GhostPassword/app/build/generated/source/buildConfig/buildConfig.iml" filepath="$PROJECT_DIR$/Android/GhostPassword/app/build/generated/source/buildConfig/buildConfig.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Android/GhostPassword/app/build/intermediates/manifest/androidTest/debug/debug.iml" filepath="$PROJECT_DIR$/Android/GhostPassword/app/build/intermediates/manifest/androidTest/debug/debug.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Android/GhostPassword/app/build/intermediates/manifests/full/debug/debug.iml" filepath="$PROJECT_DIR$/Android/GhostPassword/app/build/intermediates/manifests/full/debug/debug.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Android/GhostPassword/app/src/main/main.iml" filepath="$PROJECT_DIR$/Android/GhostPassword/app/src/main/main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/backendCode_dep/GhostPasswordBackend/src/main/main1.iml" filepath="$PROJECT_DIR$/backendCode_dep/GhostPasswordBackend/src/main/main1.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Android/GhostPassword/app/build/generated/source/r/r.iml" filepath="$PROJECT_DIR$/Android/GhostPassword/app/build/generated/source/r/r.iml" />
+      <module fileurl="file://$PROJECT_DIR$/backendCode_dep/GhostPasswordBackend/src/test/test.iml" filepath="$PROJECT_DIR$/backendCode_dep/GhostPasswordBackend/src/test/test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Android/GhostPassword/app/src/test/test1.iml" filepath="$PROJECT_DIR$/Android/GhostPassword/app/src/test/test1.iml" />
+    </modules>
+  </component>
+</project>

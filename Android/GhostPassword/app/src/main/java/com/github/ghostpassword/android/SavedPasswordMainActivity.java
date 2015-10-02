@@ -13,9 +13,14 @@ import android.widget.Button;
 import android.widget.GridView;
 import android.widget.Toast;
 
+import com.github.ghostpassword.ghostpasswordbackend.BlueToothDao;
 import com.github.ghostpassword.ghostpasswordbackend.PasswordServiceHolder;
+import com.github.ghostpassword.ghostpasswordbackend.Utils;
+import com.github.ghostpassword.ghostpasswordbackend.domain.Password;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 public class SavedPasswordMainActivity extends AppCompatActivity implements View.OnClickListener{
 
@@ -42,18 +47,22 @@ public class SavedPasswordMainActivity extends AppCompatActivity implements View
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_saved_password_main);
 
-        GridView gridview = (GridView) findViewById(R.id.gridview);
+        GridView gridview = (GridView) findViewById(R.id.gridView);
         //gridview.setAdapter(new ButtonAdapter(this));
         gridview.setAdapter(new CustomAdapter(mButtons));
 
+        try{
         Button cb = null;
-
-        for (int i =0; i<12; i++) {
+        List<Password> pass = PasswordServiceHolder.getPasswordService().getAllPasswordsOrderByAlphabetical();
+        for (int i =0; i<pass.size(); i++) {
             cb = new Button(this);
-            cb.setText(Integer.toString(i));
+            cb.setText(pass.get(i).getFriendlyName());
             cb.setOnClickListener(this);
             cb.setId(i);
             mButtons.add(cb);
+        }}catch (Exception e){
+            throw new RuntimeException(e);
+
         }
 
     }
@@ -66,6 +75,24 @@ public class SavedPasswordMainActivity extends AppCompatActivity implements View
     public void onClick(View v) {
         Button selection = (Button)v;
         Toast.makeText(getBaseContext(), selection.getText()+ " was pressed!", Toast.LENGTH_SHORT).show();
+        try{
+        Password decypted =PasswordServiceHolder.getPasswordService().getPasswordDecrypted(Utils.calculateKey(selection.getText().toString()));
+            synchronized (this) {
+                BlueToothDao dao = new BlueToothDao();
+                try {
+                    dao.write(decypted.getPasswordText());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } finally {
+                    dao.close();
+                }
+            }
+        }
+
+        catch (Exception e){
+            throw new RuntimeException(e);
+
+        }
     }
 
 /*    @Override
