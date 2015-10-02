@@ -1,27 +1,44 @@
 package com.github.ghostpassword.android;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 
 import com.github.ghostpassword.ghostpasswordbackend.PasswordService;
 
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.util.NoSuchElementException;
+
 public class DisplaySavedPassScreenActivity extends AppCompatActivity {
 
-    //private PasswordService passwordService = new PasswordService()
+    private TextView password;
+    private TextView errorField;
 
-
-    public void onUnlockAttempt(View view){
+    public void onUnlockAttempt(View view) throws NoSuchAlgorithmException, IOException{
         System.out.println("Trying to unlock...");
+        if(PasswordService.checkPassword(password.getText().toString())){
+            System.out.println("Unlocking...");
+            Intent intent = new Intent(this, SavedPasswordMainActivity.class);
+            startActivity(intent);
 
+        } else {
+            System.out.println("Password is incorrect");
+            errorField.setText("The password is incorrect. Try again.");
+            password.setText("");
+        }
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_display_saved_pass_screen);
+        password = (TextView)findViewById(R.id.masterpass);
+        errorField =(TextView)findViewById(R.id.errorLabel);
     }
 
     @Override

@@ -1,6 +1,5 @@
 package com.github.ghostpassword.ghostpasswordbackend;
 
-import static com.github.ghostpassword.ghostpasswordbackend.PasswordDao.TEST_FILE;
 import com.github.ghostpassword.ghostpasswordbackend.domain.Password;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;

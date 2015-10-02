@@ -23,11 +23,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/EnterPassPrompt"
-        android:layout_alignBottom="@+id/masterpass"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="49dp"
         android:text="Enter master password:"
-        android:background="@drawable/abc_ab_share_pack_mtrl_alpha" />
+        android:background="@drawable/abc_ab_share_pack_mtrl_alpha"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="83dp" />
 
     <Button
         android:layout_width="wrap_content"
@@ -38,4 +38,12 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="35dp"
         android:onClick="onUnlockAttempt" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:id="@+id/errorLabel"
+        android:layout_below="@+id/EnterPassPrompt"
+        android:layout_centerHorizontal="true" />
 </RelativeLayout>

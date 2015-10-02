@@ -5,4 +5,5 @@
     <string name="title_activity_display_one_time">DisplayOneTimeActivity</string>
     <string name="title_activity_display_saved_pass_screen">DisplaySavedPassScreenActivity</string>
     <string name="title_activity_check_and_init">Setup</string>
+    <string name="title_activity_saved_password_main">Saved Passwords</string>
 </resources>

@@ -32,6 +32,10 @@
             android:name=".CheckAndInit"
             android:label="@string/title_activity_check_and_init" >
         </activity>
+        <activity
+            android:name=".SavedPasswordMainActivity"
+            android:label="@string/title_activity_saved_password_main" >
+        </activity>
     </application>
 
 </manifest>

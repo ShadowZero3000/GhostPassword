@@ -33,7 +33,7 @@ public class PasswordDao
     /**
      * Base directory for this app.
      */
-    public static final File BASE_DIR = new File(System.getProperty("com.github.ghostpassword.filedir"), "ghostpass");//ugly
+    public static final File BASE_DIR = new File(System.getProperty("com.github.ghostpassword.filedir"), "ghostpass");//ugly!
 
     /**
      * Salt file for this app.
