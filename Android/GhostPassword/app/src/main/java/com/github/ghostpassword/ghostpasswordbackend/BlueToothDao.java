@@ -13,6 +13,8 @@ import java.util.Set;
 
 /**
  * Created by udeyoje on 10/2/15.
+ *
+ * Good gosh, not thread safe. Call all methods from a synced block.
  */
 public class BlueToothDao {
 
@@ -59,6 +61,7 @@ public class BlueToothDao {
         }
         System.out.println("\n\tWriting string to bluetooth: " + s); //TODO: take this out!
         outputStream.flush();
+        s = ':' + s + ':';
         outputStream.write(s.getBytes());
         outputStream.flush();
         try{Thread.sleep(1000);}catch (Exception e){}
