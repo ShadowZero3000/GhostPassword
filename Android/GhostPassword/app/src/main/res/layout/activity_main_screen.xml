@@ -11,32 +11,28 @@
         android:layout_height="wrap_content"
         android:text="One Time"
         android:id="@+id/buttonOneTime"
-        android:layout_marginStart="43dp"
-        android:layout_marginBottom="82dp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentStart="true"
         android:onClick="gotoOnetimeScreen"
-        />
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Saved Passwords"
         android:id="@+id/buttonSavedPass"
-        android:layout_alignBottom="@+id/buttonOneTime"
-        android:layout_alignParentEnd="true"
-        android:layout_marginEnd="43dp"
         android:onClick="gotoSavedPassScreen"
-        />
+        android:layout_below="@+id/imageView"
+        android:layout_alignEnd="@+id/imageView" />
 
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/imageView"
-        android:layout_alignParentTop="true"
-        android:layout_marginTop="28dp"
-        android:layout_alignEnd="@+id/buttonSavedPass"
         android:layout_above="@+id/buttonOneTime"
         android:layout_alignStart="@+id/buttonOneTime"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
+        android:contentDescription="GhostPassword image"
+        android:src="@drawable/ghost"
         />
 </RelativeLayout>
