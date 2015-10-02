@@ -59,9 +59,21 @@ public class BlueToothDao {
         if (outputStream == null) {
             System.out.println("Output stream is null.");
         }
-        System.out.println("\n\tWriting string to bluetooth: " + s); //TODO: take this out!
         outputStream.flush();
         s = ':' + s + ':';
+        System.out.println("\n\tWriting string to bluetooth: " + s); //TODO: take this out!
+        outputStream.write(s.getBytes());
+        outputStream.flush();
+        try{Thread.sleep(1000);}catch (Exception e){}
+    }
+
+    public void writeQR(String s) throws IOException {
+        if (outputStream == null) {
+            System.out.println("Output stream is null.");
+        }
+        outputStream.flush();
+        s = '-' + s + ':';
+        System.out.println("\n\tWriting string to bluetooth: " + s); //TODO: take this out!
         outputStream.write(s.getBytes());
         outputStream.flush();
         try{Thread.sleep(1000);}catch (Exception e){}

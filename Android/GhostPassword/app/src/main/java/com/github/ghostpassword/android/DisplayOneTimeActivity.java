@@ -64,19 +64,21 @@ public class DisplayOneTimeActivity extends AppCompatActivity {
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
         IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
         if (result != null) {
-            if(result.getContents() == null) {
+            if (result.getContents() == null) {
                 Log.d("MainActivity", "Cancelled scan");
                 Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show();
             } else {
                 Log.d("MainActivity", "Scanned");
                 Toast.makeText(this, "Scanned: " + result.getContents(), Toast.LENGTH_LONG).show();
-                BlueToothDao dao = new BlueToothDao();
-                try {
-                    dao.write(result.getContents());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } finally {
-                    dao.close();
+                synchronized (this) {
+                    BlueToothDao dao = new BlueToothDao();
+                    try {
+                        dao.writeQR(result.getContents());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } finally {
+                        dao.close();
+                    }
                 }
             }
         } else {
@@ -87,8 +89,7 @@ public class DisplayOneTimeActivity extends AppCompatActivity {
     }
 
 
-
-    public void init() throws IOException{
+    public void init() throws IOException {
 
     }
 
