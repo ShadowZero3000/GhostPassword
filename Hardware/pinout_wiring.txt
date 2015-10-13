@@ -1,0 +1,14 @@
+Wiring things up was relatively simple for the Teensy 2.0. These pins have to change for other teensies (such as the LC) since their clock sync and serial pins change. I didn't document what pins they were on the Teensy LC.
+
+
+Plug power and ground into all devices. To simplify this, we took four header pins and soldered them together so that you could plug all four devices into a single 'backbone' for power or ground using jumper cables. This method is recommended, as it is simple, and relatively space conservative vs. our original plan of splicing cables together. Simply put four headers in a square and solder one side of them, leaving one side for the jumpers to attach to. Put heat-shrink wrap on the soldered side to prevent shorts. Then run a jumper from power/ground to one of the pins, and jumpers to the various devices on the other pins.
+
+Teensy 2.0 pinout:
+Pin 0: TX-0 on bluetooth
+Pin 1: RX-0 on bluetooth
+Pin 2: Input pin on led
+Pin 3: One side of the button
+Pin 4: Empty
+Pin 5: One of the two control pins on the RTC
+Pin 6: The other control pin on the RTC
+Pin 7: Other side of the button (This pin provides power) (Toggle switch style)
