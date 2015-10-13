@@ -136,6 +136,7 @@ void setup() {
    if(timeStatus() != timeSet) {
       setColor('r');
   } else {
+      pixels.setBrightness(16);
       setColor('g'); 
   }
    
