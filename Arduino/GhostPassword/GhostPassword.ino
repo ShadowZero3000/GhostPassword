@@ -13,6 +13,16 @@
 #include <Adafruit_NeoPixel.h>
 #include <Arduino.h>  // for type definitions
 
+//Instructions:
+// Plug power and ground into all devices
+// Pin 0: TX-0 on bluetooth
+// Pin 1: RX-0 on bluetooth
+// Pin 2: Input pin on led
+// Pin 3: One side of the button
+// Pin 4: Empty
+// Pin 5: One of the two control pins on the RTC
+// Pin 6: The other control pin on the RTC
+// Pin 7: Other side of the button (This pin provides power)
 
 #define CONFIG_VERSION 2
 #define CONFIG_START 1
@@ -22,8 +32,9 @@
 #define EEPROM_MAX_ADDR 1024 // Max size on the Teensy 2
 
 
-#define BUTTON_PIN 2
-#define LED_PIN 3
+#define BUTTON_PIN 3
+#define BUTTON_PWR_PIN 7
+#define LED_PIN 2
 #define LED_COUNT 1
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
 
@@ -85,6 +96,8 @@ void setup() {
   digitalClockDisplay();
   //Prep button
   pinMode(BUTTON_PIN, INPUT);
+  pinMode(BUTTON_PWR_PIN, OUTPUT);
+  digitalWrite(BUTTON_PWR_PIN, HIGH);
   
   // Prep bluetooth
    setColor('b');
@@ -186,14 +199,18 @@ void loop() {
   if(bluetooth.available() > 0){
     String input = bluetooth.readString();
     Serial.println(input);
+    
   }*/
   
   if (digitalRead(BUTTON_PIN) == HIGH) {
-    //Serial.println("Button is not pressed...");
-  } else {
+    Serial.println("Button pressed!!!");
     //Keyboard.write(totp.getCode(now())); 
-    //Serial.println("Button pressed!!!");
-    delay(1000);
+    Serial.print("OTP Code: ");
+    Serial.println(totp.getCode(now()));
+    delay(1500);
+  } else {
+    Serial.println("Button is not pressed...");
+    delay(100);
   }
 }
 
@@ -275,10 +292,10 @@ void saveConfig() {
 void initialTimeSet(){
   int year = 2015;
   int month = 10;
-  int day = 1;
-  int hour = 13+6;
-  int minute = 42;
-  int second = 0;
+  int day = 13;
+  int hour = 10+6;
+  int minute = 8;
+  int second = 50;
   setTime(hour, minute, second, day, month, year);   //set the system time to 23h31m30s on 13Feb2009
   RTC.set(now());                     //set the RTC from the system time
 }
