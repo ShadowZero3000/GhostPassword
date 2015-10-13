@@ -1,25 +1,38 @@
 Parts needed:
 1 - Teensy 2.0 (https://www.sparkfun.com/products/retired/12765)
+  * Estimated cost: $18
   * We used an LC originally, but the EEPROM was very small. That might work, and probably a 2.0++ or 3
   However, the pin layout had to change for the LC, and I assume would have to for anything but the 2.0
 1 - BlueSmirf (https://www.sparkfun.com/products/12577 or https://www.sparkfun.com/products/10938)
+  * Estimated cost: $25
   * We used the HID, which required changing a setting to make it not an HID device. The silver is probably a better choice
 1 - DS3231 RTC (http://www.amazon.com/gp/product/B00HCB7VYS)
+  * Estimated cost: $4
   * This unit was somewhat large, and could likely be replaced by a smaller unit. However: Do not use
   a DS1307 chipset. The DS1307's are sensitive to pressure/temperature and lose time rapidly. The DS3231 is far more reliable
 1 - NeoPixel LED (https://www.adafruit.com/products/1612)
+  * Estimated cost: $4
   * Optional. Useful for status, and generally fun to use
 1 - Momentary switch
+  * Estimated cost: $1
   * We picked up some random switches till we found one that fit.
   * There are two types, a four-pin momentary, and a toggle (2 pin). Circuit layout varies for them.
 1 - Case (http://www.containerstore.com/s/hinged-boxes/d?productId=10032173)
+  * Estimated cost: $2
   * We used a medium hinged box, but anything that fits it all will work
   * This took a lot of trial and error on box size
 1 set - Right angle headers (https://www.sparkfun.com/products/553)
+  * Estimated cost: $1
   * We soldered these on ourselves.
   * The pinout side (0-8) was soldered out away from the board
   * The power pin was soldered so that it extended over the other pin holes
   * You could do this however you prefer, but to keep it low profile, we recommend the right-angles
 A bunch - Jumper wires (http://www.amazon.com/Veewon-Flexible-Multicolored-Female-Breadboard/dp/B00N7XXJG4)
+  * Estimated cost: $1
   * We used 10cm ones to reduce the amount of cabling inside the box.
   * You could solder everything, but good luck with that. Jumper cables worked great.
+
+
+Total cost estimate: $55
+
+If you were to eliminate the OTP functionality and the LED, you could get costs down to $46, but it would kinda eliminate half the functionality.
