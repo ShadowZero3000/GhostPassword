@@ -15,14 +15,15 @@
 
 //Instructions:
 // Plug power and ground into all devices
+// Additionally, hook the button up to ground
 // Pin 0: TX-0 on bluetooth
 // Pin 1: RX-0 on bluetooth
 // Pin 2: Input pin on led
-// Pin 3: One side of the button
+// Pin 3: Empty
 // Pin 4: Empty
 // Pin 5: One of the two control pins on the RTC
 // Pin 6: The other control pin on the RTC
-// Pin 7: Other side of the button (This pin provides power)
+// Pin 7: One side of the button
 
 #define CONFIG_VERSION 2
 #define CONFIG_START 1
@@ -32,11 +33,12 @@
 #define EEPROM_MAX_ADDR 1024 // Max size on the Teensy 2
 
 
-#define BUTTON_PIN 3
-#define BUTTON_PWR_PIN 7
+#define BUTTON_PIN 7
 #define LED_PIN 2
 #define LED_COUNT 1
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
+
+#define OTP_SETTING_INDEX 0
 
 //Tx = 0 on LC
 //Rx = 1 on LC
@@ -50,6 +52,7 @@ String bt_input="";
 int receiving_input=0;
 int receiving_type=0;
 TOTP totp = TOTP({},0);
+bool debug_mode = false;
 
 struct SettingsStruct {
   // This detects that they are our stored settings
@@ -62,8 +65,16 @@ byte settingsCount=0;
 
 void setup() {
   Serial.begin(9600);
-  Serial.print("Struct size: ");
-  Serial.println(sizeof(SettingsStruct));
+  
+  //Prep button
+  pinMode(BUTTON_PIN, INPUT_PULLUP);
+  //pinMode(BUTTON_PWR_PIN, OUTPUT);
+  //digitalWrite(BUTTON_PWR_PIN, HIGH);
+
+  if (digitalRead(BUTTON_PIN) == LOW) {
+    debug_mode = true;
+    Serial.println("Entering debug mode.");
+  }
   /*
   settingsCount=1;
   settings = new String[1];
@@ -75,29 +86,23 @@ void setup() {
   */
   pixels.begin();
   setColor('o');
-  // put your setup code here, to run once:
-  //settings[0]=String("Test");
-  Serial.print("String length: ");
-  Serial.println(settings[0].length());
-  Serial.print("Setting: ");
-  Serial.println(settings[0]);
   //initialTimeSet();
   // Get your timer detail from the RTC
   setSyncProvider(RTC.get);   // the function to get the time from the RTC
   if(timeStatus() != timeSet) {
-      Serial.println("Unable to sync with the RTC");
+      if(debug_mode){
+        Serial.println("Unable to sync with the RTC");
+      }
       setColor('r');
   }
   else {
-      Serial.println("RTC has set the system time");   
+      if(debug_mode){
+        Serial.println("RTC has set the system time");   
+      }
       setColor('g');
   }
   prepareOtp();
   digitalClockDisplay();
-  //Prep button
-  pinMode(BUTTON_PIN, INPUT);
-  pinMode(BUTTON_PWR_PIN, OUTPUT);
-  digitalWrite(BUTTON_PWR_PIN, HIGH);
   
   // Prep bluetooth
    setColor('b');
@@ -114,25 +119,17 @@ void setup() {
    bluetooth.println("SN,GhostPassword");
    delay(200);
    bluetooth.println("U,9600,N");
-   Serial.print(bluetooth.readString());
+   
+   if(debug_mode){
+     Serial.print(bluetooth.readString());
+   }
    delay(200);
    
    bluetooth.begin(bluetoothBaud);
-   Serial.println("Bluetooth Baud set to 9600");
-   //bluetooth.println("---");
-   //delay(200);
-   /*bluetooth.print("$");
-   bluetooth.print("$");
-   bluetooth.print("$");
-   delay(300);
-   bluetooth.println("SN,GhostPassword");
-   delay(300);
-   //bluetooth.println("S~,0");
-   //delay(200);
-   bluetooth.println("---");
-   delay(100);
-   //bluetooth.readString();
-   */
+   
+   if(debug_mode){
+     Serial.println("Bluetooth Baud set to 9600");
+   }
    if(timeStatus() != timeSet) {
       setColor('r');
   } else {
@@ -144,26 +141,10 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-  //Serial.println(totp.getCode(now()));
-  //Serial.println(now());
-  //Serial.println(totp.getCode(now()));
-  if(Serial.available() > 0){
-    
-    String input = Serial.readString();
-    Serial.println(input);
-    if(input.equals("totp")){
-      Serial.println("Got input");
-      Serial.println(now());
-      Serial.println(totp.getCode(now()));
-      Keyboard.write(totp.getCode(now())); 
-    }
-  }
-  //delay(1000);
   if(bluetooth.available())  // If the bluetooth sent any characters
   {
     char input = bluetooth.read();
     byte initial_char=0;
-    //Serial.print(input);  
     if(receiving_input==0){
       // If we are starting a new string
       if(input==':'){
@@ -171,6 +152,7 @@ void loop() {
         receiving_type=1;
         initial_char=1;
       }
+      // If we are starting a new QR code
       if(input=='-'){
         receiving_input=1;
         receiving_type=2;
@@ -190,43 +172,46 @@ void loop() {
     } else {
       initial_char = 0;
     }
-    //String input = bluetooth.readString();
-    //Serial.print(input);
-    //Keyboard.print(input); 
-    // Send any characters the bluetooth prints to the serial monitor
-    //Serial.print((char)bluetooth.read());  
     
-  }/*
-  if(bluetooth.available() > 0){
-    String input = bluetooth.readString();
-    Serial.println(input);
-    
-  }*/
+  }
   
-  if (digitalRead(BUTTON_PIN) == HIGH) {
-    Serial.println("Button pressed!!!");
-    //Keyboard.write(totp.getCode(now())); 
-    Serial.print("OTP Code: ");
-    Serial.println(totp.getCode(now()));
+  if (digitalRead(BUTTON_PIN) == LOW) {
+    if(debug_mode){
+      Serial.println("Button pressed!!!");
+      Serial.print("OTP Code: ");
+      Serial.println(totp.getCode(now()));
+    }
+    Keyboard.write(totp.getCode(now()));
     delay(1500);
   } else {
-    Serial.println("Button is not pressed...");
-    delay(100);
+    //Serial.println("Button is not pressed...");
+    //delay(100);
   }
 }
 
 
 void processInput(String input_string,int type){
-  Serial.println();
+  if(debug_mode){
+    Serial.println();
+  }
   if(receiving_type==2){
-    Serial.print("QR Code received: ");
-    Serial.println(input_string);
-    Serial.print("Length: ");
-    Serial.println(input_string.length());
+    if(debug_mode){
+      Serial.print("QR Code received: ");
+      Serial.println(input_string);
+      Serial.print("Length: ");
+      Serial.println(input_string.length());
+    }
+    //char otp_seed[] = "R4U3Y7HAL5KYFWNKCOZSKTWQQGSQX6H5TFR7UEKZMMAGGV2YYDB4KZ2SPNB3LZ52"; 
+    settings[0] = String(input_string);
+    saveConfig();
+    // Since we have a new OTP, run the initializer for it
+    prepareOtp();
   } 
   if(receiving_type==1){
-    Serial.print("String input received. Typing: ");
-    Serial.println(input_string);
+    if(debug_mode){
+      Serial.print("String input received. Typing: ");
+      Serial.println(input_string);
+    }
     Keyboard.print(input_string);
   }
 }
@@ -234,6 +219,9 @@ void processInput(String input_string,int type){
 
 //BEGIN EEPROM stuff
 void loadConfig() {
+  if(debug_mode){
+    Serial.println("Reading from EEPROM...");
+  }
   if(EEPROM.read(CONFIG_START + 0) == CONFIG_VERSION) {
     settingsCount=EEPROM.read(CONFIG_START + 1);
     
@@ -254,15 +242,28 @@ void loadConfig() {
       for(unsigned int k=0; k<setting.stringSize; k++){
         *((char*)&input + k)  = EEPROM.read(setting.stringStart + k);
       }
-      Serial.println(input);
+      // Use this section to validate reading of settings
+      
+      if(debug_mode){
+        Serial.print("For setting: ");
+        Serial.print(t);
+        Serial.print(" we read: ");
+        Serial.println(input);
+      }
+      settings[t]=String(input);
     }
   } else {
-    Serial.println("No settings to load");
+    if(debug_mode){
+      Serial.println("No settings to load");
+    }
     settings = new String[0];
     settings[0] = "";
   }
 }
 void saveConfig() {
+  if(debug_mode){
+    Serial.println("Writing settings to EEPROM...");
+  }
   EEPROM.write(CONFIG_START + 0, CONFIG_VERSION);
   EEPROM.write(CONFIG_START + 1, settingsCount);
   byte sSize=sizeof(SettingsStruct);
@@ -285,12 +286,14 @@ void saveConfig() {
     stringStartIndex += slen + 1;
   }
 }
-
-
 //END EEPROM stuff
+
 //BEGIN RTC stuff
 
 void initialTimeSet(){
+  // This code is only needed for the initial sync
+  // Once set, it should be commented out.
+  // Remember that your time should be UTC (I think)
   int year = 2015;
   int month = 10;
   int day = 13;
@@ -303,6 +306,7 @@ void initialTimeSet(){
 
 void digitalClockDisplay(void)
 {
+  if(debug_mode){
     // digital clock display of the time
     Serial.print(hour());
     printDigits(minute());
@@ -313,21 +317,29 @@ void digitalClockDisplay(void)
     Serial.print(month());
     Serial.print(' ');
     Serial.print(year()); 
-    Serial.println(); 
+    Serial.println();
+  } 
 }
 void printDigits(int digits)
 {
+  if(debug_mode){
     // utility function for digital clock display: prints preceding colon and leading 0
     Serial.print(':');
-    if(digits < 10)
+    if(digits < 10) {
         Serial.print('0');
+    }
     Serial.print(digits);
+  }
 }
 ///END RTC Stuff
 
+
+//// BEGIN OTP Stuff
 void prepareOtp(){
   //Set setting from eeprom
-  char otp_seed[] = "R4U3Y7HAL5KYFWNKCOZSKTWQQGSQX6H5TFR7UEKZMMAGGV2YYDB4KZ2SPNB3LZ52"; 
+  unsigned int l=settings[OTP_SETTING_INDEX].length();
+  char otp_seed[l];
+  settings[OTP_SETTING_INDEX].toCharArray(otp_seed,l+1); // Arraysize + 1 for proper extraction
   int decoded_size=0;
   uint8_t* decoded_seed;
   base32decode(otp_seed, sizeof(otp_seed), decoded_seed, decoded_size);
@@ -371,7 +383,9 @@ void base32decode(char input[], int inputLen, uint8_t* &output, int &output_size
 }
 
 
-// Pixel color code:
+//// END OTP Stuff
+
+//// BEGIN Pixel color code:
 
 void setColor(char color){
   byte val=50;
@@ -385,8 +399,6 @@ void setColor(char color){
     case 'g': val=84;
       break;
   }
-  //Serial.print("Color: ");
-  //Serial.println(val);
   pixels.setPixelColor(0, Wheel(val));
   pixels.show();
 }
@@ -402,3 +414,4 @@ uint32_t Wheel(byte WheelPos) {
   WheelPos -= 170;
   return pixels.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
 }
+//// END Pixel stuff
