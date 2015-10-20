@@ -30,9 +30,14 @@ public class BlueToothDao {
                 if (bondedDevices.size() > 0) {
                     ArrayList<BluetoothDevice> devices = new ArrayList<>();
                     for (BluetoothDevice device : bondedDevices) {
-                        devices.add(device);
+                        if(device.getName().equals("GhostPassword")) {
+                            devices.add(device);
+                            System.out.println("I added device: ");
+                            System.out.println(device);
+                        }
                     }
                     BluetoothDevice device = devices.get(0);
+
                     ParcelUuid[] uuids = device.getUuids();
                     BluetoothSocket socket = null;
                     try {

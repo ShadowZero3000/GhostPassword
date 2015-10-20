@@ -60,7 +60,11 @@ public class DisplayOneTimeActivity extends AppCompatActivity {
                 synchronized (this) {
                     BlueToothDao dao = new BlueToothDao();
                     try {
-                        dao.writeQR(result.getContents());
+                        String res=result.getContents();
+                        res=res.substring(res.indexOf("secret=")+7);
+                        System.out.println("True result");
+                        System.out.println(res);
+                        dao.writeQR(res);
                     } catch (IOException e) {
                         e.printStackTrace();
                     } finally {
