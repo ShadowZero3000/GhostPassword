@@ -6,8 +6,10 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import com.github.ghostpassword.ghostpasswordbackend.BlueToothDao;
+import com.github.ghostpassword.ghostpasswordbackend.GhostPasswordException;
 
 import java.io.IOException;
 
@@ -23,13 +25,18 @@ public class MainScreen extends AppCompatActivity {
 
     public void sendString(View view) {
         synchronized (this) {
-            BlueToothDao dao = new BlueToothDao();
             try {
-                dao.write("This is a string!");
-            } catch (IOException e) {
+                BlueToothDao dao = new BlueToothDao();
+                try {
+                    dao.write("This is a string!");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } finally {
+                    dao.close();
+                }
+            } catch (GhostPasswordException e) {
                 e.printStackTrace();
-            } finally {
-                dao.close();
+                Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
             }
         }
 

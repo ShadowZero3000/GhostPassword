@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.os.ParcelUuid;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -21,7 +22,7 @@ public class BlueToothDao {
     private OutputStream outputStream;
     private BluetoothSocket socket;
 
-    public  BlueToothDao() {
+    public  BlueToothDao() throws GhostPasswordException{
         BluetoothAdapter blueAdapter = BluetoothAdapter.getDefaultAdapter();
         if (blueAdapter != null) {
             if (blueAdapter.isEnabled()) {
@@ -34,7 +35,11 @@ public class BlueToothDao {
                             devices.add(device);
                             System.out.println("I added device: ");
                             System.out.println(device);
+                            System.out.println("Notice: Will only work with the first GP device available.");
                         }
+                    }
+                    if(devices.size() == 0){
+                        throw new GhostPasswordException("No paired Ghost Password devices", new Throwable("Bluetooth"));
                     }
                     BluetoothDevice device = devices.get(0);
 
@@ -45,16 +50,18 @@ public class BlueToothDao {
                         socket.connect();
                         outputStream = socket.getOutputStream();
                     } catch (IOException | ArrayIndexOutOfBoundsException | IllegalStateException | NullPointerException e) {
-                        e.printStackTrace();
                         System.out.println("\n--------------------Could not connect to bluetooth device!---------------\n");
-                        //TODO: error handling here -- display a message or something
+                        e.printStackTrace();
+                        throw new GhostPasswordException("Unable to connect to bluetooth device", new Throwable("Bluetooth"));
                     }
 
                 } else {
                     Log.e("error", "No appropriate paired devices.");
+                    throw new GhostPasswordException("No paired Ghost Password devices", new Throwable("Bluetooth"));
                 }
             } else {
                 Log.e("error", "Bluetooth is disabled.");
+                throw new GhostPasswordException("Bluetooth disabled. Please enable.", new Throwable("Bluetooth"));
             }
         }
 

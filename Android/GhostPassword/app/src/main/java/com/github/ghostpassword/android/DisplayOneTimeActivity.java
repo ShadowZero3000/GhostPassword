@@ -17,13 +17,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.ghostpassword.ghostpasswordbackend.BlueToothDao;
+import com.github.ghostpassword.ghostpasswordbackend.GhostPasswordException;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 public class DisplayOneTimeActivity extends AppCompatActivity {
@@ -46,6 +50,22 @@ public class DisplayOneTimeActivity extends AppCompatActivity {
 
     }
 
+    public static Map<String, String> getQueryMap(String query)
+    {
+        String[] params = query.split("&");
+        Map<String, String> map = new HashMap<String, String>();
+        for (String param : params)
+        {
+            String[] qp=param.split("=");
+            String name = qp[0];
+            String value = "";
+            if(qp.length>1){
+                value = qp[1];
+            }
+            map.put(name, value);
+        }
+        return map;
+    }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
@@ -56,19 +76,35 @@ public class DisplayOneTimeActivity extends AppCompatActivity {
                 Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show();
             } else {
                 Log.d("MainActivity", "Scanned");
+                Log.d("MainActivity", result.getContents());
                 Toast.makeText(this, "Scanned: " + result.getContents(), Toast.LENGTH_LONG).show();
                 synchronized (this) {
-                    BlueToothDao dao = new BlueToothDao();
                     try {
-                        String res=result.getContents();
-                        res=res.substring(res.indexOf("secret=")+7);
-                        System.out.println("True result");
-                        System.out.println(res);
-                        dao.writeQR(res);
-                    } catch (IOException e) {
+                        BlueToothDao dao = new BlueToothDao();
+                        try {
+                            String res=result.getContents();
+                            URI url = new URI(res);
+                            Map<String, String> map = getQueryMap(url.getQuery());
+                            Set<String> keys = map.keySet();
+                            if(!keys.contains("secret")){
+                                Log.d("MainActivity","Invalid QR code");
+                                Toast.makeText(this, "Invalid TOTP QR code", Toast.LENGTH_LONG).show();
+                            } else {
+                                Log.d("MainActivity","Code: "+map.get("secret"));
+                                System.out.println("True result");
+                                System.out.println(map.get("secret"));
+                                dao.writeQR(map.get("secret"));
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        } catch (URISyntaxException e) {
+                            e.printStackTrace();
+                        } finally {
+                            dao.close();
+                        }
+                    } catch (GhostPasswordException e) {
                         e.printStackTrace();
-                    } finally {
-                        dao.close();
+                        Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
                     }
                 }
                 Intent main = new Intent(this, MainScreen.class);
