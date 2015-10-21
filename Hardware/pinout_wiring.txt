@@ -9,6 +9,6 @@ Pin 1: RX-0 on bluetooth
 Pin 2: Input pin on led
 Pin 3: Empty
 Pin 4: Empty
-Pin 5: One of the two control pins on the RTC
-Pin 6: The other control pin on the RTC
+Pin 5: SCL pin on the RTC
+Pin 6: SDA pin on the RTC
 Pin 7: One side of the button
