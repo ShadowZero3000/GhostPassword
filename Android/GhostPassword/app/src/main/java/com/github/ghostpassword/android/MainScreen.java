@@ -1,5 +1,6 @@
 package com.github.ghostpassword.android;
 
+import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -15,28 +16,32 @@ import java.io.IOException;
 
 public class MainScreen extends AppCompatActivity {
 
+    //TODO: Figure out the right place for this
+    private BlueToothDao dao;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_screen);
         //this is an ugly hack
         System.setProperty("com.github.ghostpassword.filedir", getFilesDir().getAbsolutePath());
+        try{
+            dao = new BlueToothDao();
+        } catch (GhostPasswordException e) {
+            e.printStackTrace();
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
+        }
     }
 
     public void sendString(View view) {
         synchronized (this) {
+            //BlueToothDao dao = new BlueToothDao();
             try {
-                BlueToothDao dao = new BlueToothDao();
-                try {
-                    dao.write("This is a string!");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } finally {
-                    dao.close();
-                }
-            } catch (GhostPasswordException e) {
+                dao.write("This is a string!");
+            } catch (IOException e) {
                 e.printStackTrace();
-                Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
+            } finally {
+                //TODO: Figure out when the right time to close it is, if ever
+                //dao.close();
             }
         }
 

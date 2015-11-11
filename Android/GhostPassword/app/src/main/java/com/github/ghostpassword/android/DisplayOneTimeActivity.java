@@ -94,7 +94,9 @@ public class DisplayOneTimeActivity extends AppCompatActivity {
                                 System.out.println("True result");
                                 System.out.println(map.get("secret"));
                                 dao.writeQR(map.get("secret"));
-                            }
+                            } //TODO: We should save all QR TOTP's so that you can re-send them
+                            // Also, we should build TOTP into the app itself, because why not.
+                            //TODO: We need to have a way to sync time to the device
                         } catch (IOException e) {
                             e.printStackTrace();
                         } catch (URISyntaxException e) {
