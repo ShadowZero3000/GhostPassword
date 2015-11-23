@@ -26,7 +26,7 @@
 // Pin 6: The other control pin on the RTC
 // Pin 7: One side of the button
 
-#define CONFIG_VERSION 1
+#define CONFIG_VERSION 2
 #define CONFIG_START 1
 // #define SETTING_STRING_SIZE 254
 // #define EEPROM_MIN_ADDR 0
@@ -34,6 +34,10 @@
 //#define EEPROM_MAX_ADDR 128 // Max size on the Teensy LC
 //#define EEPROM_MAX_ADDR 1024 // Max size on the Teensy 2
 
+#define INPUT_NONE 0
+#define INPUT_STRING 1
+#define INPUT_QR 2
+#define INPUT_TIMESTAMP 3
 
 #define BUTTON_PIN 7
 #define LED_PIN 2
@@ -41,10 +45,12 @@
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
 
 #define OTP_SETTING_INDEX 0
+#define OTP_STRING_LENGTH 64
 #define MAX_BT_INPUT 256
 
 // LC can only hold one, the others could hold more
 #define MAX_SETTINGS 1
+
 
 //Tx = 0 on LC
 //Rx = 1 on LC
@@ -67,7 +73,7 @@ struct SettingsStruct {
   uint8_t stringStart;
   byte stringSize;
 };
-String settings[MAX_SETTINGS];
+char* settings[MAX_SETTINGS];
 byte settingsCount=0;
 
 
@@ -80,7 +86,7 @@ void setup() {
   if (digitalRead(BUTTON_PIN) == LOW) {
     debug_mode = true;
     log_line("Entering debug mode.");
-  }
+  }  
   loadConfig();
   log_line("Settings loaded");
 
@@ -143,19 +149,19 @@ void loop() {
       // If we are starting a new string
       if(input==':'){
         receiving_input=1;
-        receiving_type=1;
+        receiving_type=INPUT_STRING;
         initial_char=1;
       }
       // If we are starting a new QR code
       if(input=='-'){
         receiving_input=1;
-        receiving_type=2;
+        receiving_type=INPUT_QR;
         initial_char=1;
       }
       // If we are starting a new timestamp
       if(input=='@'){
         receiving_input=1;
-        receiving_type=3;
+        receiving_type=INPUT_TIMESTAMP;
         initial_char=1;
       }
     } else {
@@ -164,7 +170,7 @@ void loop() {
         receiving_input=0;
         processInput(receiving_type);
         bt_input_length=0;
-        receiving_type=0;
+        receiving_type=INPUT_NONE;
       }
     }
     if(receiving_input==1 && initial_char==0) {
@@ -197,7 +203,7 @@ void processInput(int type){
   log_line();
   log_line("---");
   //If getting time
-  if(receiving_type==3){
+  if(receiving_type==INPUT_TIMESTAMP){
     log_noline("Time received: ");
     log_line(input_string);
     log_noline("Length: ");
@@ -214,7 +220,7 @@ void processInput(int type){
     
     digitalClockDisplay();
   } 
-  if(receiving_type==2){
+  if(receiving_type==INPUT_QR){
     log_noline("QR Code received: ");
     log_line(input_string);
     log_noline("Length: ");
@@ -222,7 +228,17 @@ void processInput(int type){
     //char otp_seed[] = "R4U3Y7HAL5KYFWNKCOZSKTWQQGSQX6H5TFR7UEKZMMAGGV2YYDB4KZ2SPNB3LZ52"; 
     //delete settings[0];
     //settings = new String[1];
-    settings[0] = String(input_string);
+    char true_input[bt_input_length+1];
+    for(int i=0; i<bt_input_length; i++){
+      true_input[i]=input_string[i];
+    }
+    true_input[bt_input_length]='\0';
+    
+    settings[0] = true_input; //String(input_string);
+    log_line("Ending is: ");
+    log_line(true_input[64]=='\0');
+    log_line(strlen(true_input));
+    log_line(true_input[64]);
     settingsCount = 1;
     saveConfig();
     log_line("Otp preparing");
@@ -231,7 +247,7 @@ void processInput(int type){
     prepareOtp();
     log_line("OTP Prepped");
   } 
-  if(receiving_type==1){
+  if(receiving_type==INPUT_STRING){
     log_noline("String input received. Typing: ");
     log_line(input_string);
     Keyboard.print(input_string);
@@ -255,35 +271,24 @@ void loadConfig() {
         *((char*)&setting + j) = EEPROM.read(settingsIndex + j);
       }
       
-      settings[t]=String("");
-      char* input = new char[setting.stringSize];
       log_noline("String size: ");
       log_line(setting.stringSize);
-      for(unsigned int j=0; j<setting.stringSize; j++){
-        input[j]=0;
-      }
-      settings[t]=String("");
+      settings[t]= new char[setting.stringSize + 1];
       for(unsigned int k=0; k<setting.stringSize; k++){
-        //input[k]  = (char)EEPROM.read(setting.stringStart + k);
-        settings[t] = settings[t] + (char)EEPROM.read(setting.stringStart + k);
+        settings[t][k] = (char)EEPROM.read(setting.stringStart + k);
       }
+      settings[t][setting.stringSize] = '\0';
       // Use this section to validate reading of settings
     
       log_noline("For setting: ");
       log_noline(t);
       log_noline(" we read: ");
-      log_line(input);
-      log_noline("String length: ");
-      log_string(settings[t]);
-      //settings[t]=String(input, BIN);
-      log_noline("String length: ");
-      log_line(settings[t].length());
+      log_line(settings[t]);
     }
   } else {
     log_line("No settings to load");
-    //delete[] settings;
-    //settings = new String[1];
-    settings[0] = "";
+    settings[0] = new char[1];
+    settings[0][0] = '\0';
     settingsCount = 1;
   }
 }
@@ -297,43 +302,24 @@ void saveConfig() {
   log_line(settingsCount);
   for(unsigned int t=0; t<settingsCount; t++){
     unsigned int settingIndex=CONFIG_START+2+(t*sSize);
-    byte slen = settings[t].length();
+    byte slen = strlen(settings[0]);
     log_noline("String saving length: ");
-    log_line(settings[t].length());
+    log_line(slen);
     SettingsStruct thisSetting = {
       stringStartIndex, slen
     };
-    char buffer[settings[t].length()+1];
-    settings[t].toCharArray(buffer,settings[t].length()+1);
     for(unsigned int j=0; j<sSize; j++){
       EEPROM.write(settingIndex+j, *((char*)&thisSetting + j));
     }
     for(unsigned int m=0; m<slen; m++){
-      EEPROM.write(stringStartIndex+m, *((char*)&buffer + m));
+      EEPROM.write(stringStartIndex+m, settings[t][m]); //*((char*)&buffer + m));
     }
-    
     stringStartIndex += slen + 1;
   }
 }
 //END EEPROM stuff
 
 //BEGIN RTC stuff
-
-void initialTimeSet(){
-  // This code is only needed for the initial sync
-  // Once set, it should be commented out.
-  // Remember that your time should be UTC (I think)
-  int year = 2015;
-  int month = 10;
-  int day = 13;
-  int hour = 10+6;
-  int minute = 8;
-  int second = 50;
-  log_line("Setting initial time");
-  setTime(hour, minute, second, day, month, year);   //set the system time to 23h31m30s on 13Feb2009
-  RTC.set(now());                     //set the RTC from the system time
-}
-
 void digitalClockDisplay(void)
 {
   // digital clock display of the time
@@ -363,20 +349,15 @@ void printDigits(int digits)
 //// BEGIN OTP Stuff
 void prepareOtp(){
   //Set setting from eeprom
-  unsigned int l=settings[OTP_SETTING_INDEX].length();
+  unsigned int l=strlen(settings[OTP_SETTING_INDEX]);
   if(l == 0){
     log_line("No valid OTP, defaulting");
     totp = TOTP(0,1);
     return;
-  }
-  char otp_seed[l];
-  Serial.print("Incoming setting: ");
-  Serial.println(settings[OTP_SETTING_INDEX]);
-  settings[OTP_SETTING_INDEX].toCharArray(otp_seed,l+1); // Arraysize + 1 for proper extraction
-  Serial.println(otp_seed);
+  }  
   int decoded_size=0;
   uint8_t* decoded_seed;
-  base32decode(otp_seed, l, decoded_seed, decoded_size);
+  base32decode(settings[OTP_SETTING_INDEX], l, decoded_seed, decoded_size); //otp_seed, l, decoded_seed, decoded_size);
   totp = TOTP(decoded_seed, decoded_size);
 }
 
@@ -450,6 +431,8 @@ uint32_t Wheel(byte WheelPos) {
 }
 //// END Pixel stuff
 
+
+//// BEGIN Logging stuff
 void log_line(){
   if(debug_mode){Serial.println();}
 }
@@ -489,3 +472,4 @@ void log_string(String input){
   if(debug_mode){Serial.println(input);}
 }
 
+//// END Logging stuff
