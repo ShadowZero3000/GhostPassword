@@ -51,7 +51,7 @@ const int bluetoothBaud = 9600;
 //char BTName[] = "GhostPassword";
 //SoftwareSerial bluetooth(bluetoothTx,bluetoothRx);
 #define bluetooth Serial
-char* bt_input="";
+String bt_input="";
 int receiving_input=0;
 int receiving_type=0;
 TOTP totp = TOTP({},0);
