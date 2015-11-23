@@ -74,27 +74,22 @@ void setup() {
 
   if (digitalRead(BUTTON_PIN) == LOW) {
     debug_mode = true;
-    Serial.println("Entering debug mode.");
+    log_line("Entering debug mode.");
   }
   loadConfig();
-  if(debug_mode){
-    Serial.println("Settings loaded");
-  }
+  log_line("Settings loaded");
+
   pixels.begin();
   setColor('o');
   //initialTimeSet();
   // Get your timer detail from the RTC
   setSyncProvider(RTC.get);   // the function to get the time from the RTC  
   if(timeStatus() != timeSet) {
-      if(debug_mode){
-        Serial.println("Unable to sync with the RTC");
-      }
+      log_line("Unable to sync with the RTC");
       setColor('r');
   }
   else {
-      if(debug_mode){
-        Serial.println("RTC has set the system time");   
-      }
+      log_line("RTC has set the system time");   
       setColor('g');
   }
   prepareOtp();
@@ -126,15 +121,12 @@ void prepBluetooth(){
   delay(200);
   bluetooth.println("U,9600,N");
   
-  if(debug_mode){
-    Serial.print(bluetooth.readString());
-  }
+  log_string(bluetooth.readString());
+  
   delay(200);
   
   bluetooth.begin(bluetoothBaud);
-  if(debug_mode){
-    Serial.println("Bluetooth Baud set to 9600");
-  }
+  log_line("Bluetooth Baud set to 9600");
 }
 void loop() {
   // put your main code here, to run repeatedly:
@@ -178,71 +170,58 @@ void loop() {
   }
   
   if (digitalRead(BUTTON_PIN) == LOW) {
-    if(debug_mode){
-      Serial.println("Button pressed!!!");
-      Serial.print("OTP Code: ");
-      Serial.println(totp.getCode(now()));
-    }
+    log_line("Button pressed!!!");
+    digitalClockDisplay();
+    log_noline("OTP Code: ");
+    log_line(totp.getCode(now()));
     Keyboard.write(totp.getCode(now()));
     delay(1500);
   } else {
-    //Serial.println("Button is not pressed...");
+    //log_line("Button is not pressed...");
     //delay(100);
   }
 }
 
 
-void processInput(String input_string,int type){
-  if(debug_mode){
-    Serial.println();
-    Serial.println("---");
+void processInput(int type){
   }
+  log_line();
+  log_line("---");
   //If getting time
   if(receiving_type==3){
-    if(debug_mode){
-      Serial.print("Time received: ");
-      Serial.println(input_string);
-      Serial.print("Length: ");
-      Serial.println(input_string.length());
-    }
     char data[input_string.length()];
     for(int i=0;i<input_string.length();i++){
       data[i]=input_string[i];
+    log_noline("Time received: ");
+    log_line(input_string);
+    log_noline("Length: ");
+    log_line(bt_input_length);
     }
-    Serial.println(data);
     setTime(atol(data));
-    
-    Serial.println("Time set");
+    log_line("Time set");
     
     digitalClockDisplay();
-    delay(100);
-   // Serial.println(strptime(input_string));
-    //setTime((time_t)input_string.toInt());
   } 
   if(receiving_type==2){
-    if(debug_mode){
-      Serial.print("QR Code received: ");
-      Serial.println(input_string);
-      Serial.print("Length: ");
-      Serial.println(input_string.length());
-    }
+    log_noline("QR Code received: ");
+    log_line(input_string);
+    log_noline("Length: ");
+    log_line(bt_input_length);
     //char otp_seed[] = "R4U3Y7HAL5KYFWNKCOZSKTWQQGSQX6H5TFR7UEKZMMAGGV2YYDB4KZ2SPNB3LZ52"; 
     delete[] settings;
     settings = new String[1];
     settings[0] = String(input_string);
     settingsCount = 1;
     saveConfig();
-    Serial.println("Otp preparing");
-    Serial.println(settings[0]);
+    log_line("Otp preparing");
+    log_string(settings[0]);
     // Since we have a new OTP, run the initializer for it
     prepareOtp();
-    Serial.println("OTP Prepped");
+    log_line("OTP Prepped");
   } 
   if(receiving_type==1){
-    if(debug_mode){
-      Serial.print("String input received. Typing: ");
-      Serial.println(input_string);
-    }
+    log_noline("String input received. Typing: ");
+    log_line(input_string);
     Keyboard.print(input_string);
   }
 }
@@ -250,11 +229,9 @@ void processInput(String input_string,int type){
 
 //BEGIN EEPROM stuff
 void loadConfig() {
-  if(debug_mode){
-    Serial.println("Reading from EEPROM...");
-  }
   delete[] settings;
   settings = new String[1];
+  log_line("Reading from EEPROM...");
   if(EEPROM.read(CONFIG_START + 0) == CONFIG_VERSION) {
     settingsCount=EEPROM.read(CONFIG_START + 1);
     
@@ -272,52 +249,52 @@ void loadConfig() {
       
       settings[t]=String("");
       char input[setting.stringSize];
-      Serial.println("String size: ");
-      Serial.println(setting.stringSize);
       for(unsigned int k=0; k<setting.stringSize; k++){
         //Serial.print((char)EEPROM.read(setting.stringStart + k));
         *((char*)&input + k)  = EEPROM.read(setting.stringStart + k);
+      log_noline("String size: ");
+      log_line(setting.stringSize);
       }
       /*char ib[setting.stringSize];
       for(unsigned int k=0; k<setting.stringSize; k++){
         ib[k]=input[k];
       }
-      Serial.println(" - ");
-      Serial.println(ib);
       */
       // Use this section to validate reading of settings
       
-      if(debug_mode){
-        Serial.print("For setting: ");
-        Serial.print(t);
-        Serial.print(" we read: ");
-        Serial.println(input);
-      }
       settings[t]=String(input);
+    
+      log_noline("For setting: ");
+      log_noline(t);
+      log_noline(" we read: ");
+      log_line(input);
+      log_noline("String length: ");
+      log_string(settings[t]);
+      //settings[t]=String(input, BIN);
+      log_noline("String length: ");
+      log_line(settings[t].length());
     }
   } else {
-    if(debug_mode){
-      Serial.println("No settings to load");
-    }
-    delete[] settings;
-    settings = new String[1];
+    log_line("No settings to load");
+    //delete[] settings;
+    //settings = new String[1];
     settings[0] = "";
     settingsCount = 1;
   }
 }
 void saveConfig() {
-  if(debug_mode){
-    Serial.println("Writing settings to EEPROM...");
-  }
+  log_line("Writing settings to EEPROM...");
   EEPROM.write(CONFIG_START + 0, CONFIG_VERSION);
   EEPROM.write(CONFIG_START + 1, settingsCount);
   byte sSize=sizeof(SettingsStruct);
   unsigned int stringStartIndex=CONFIG_START+2+settingsCount*sSize;
   
-  Serial.println(settingsCount);
+  log_line(settingsCount);
   for(unsigned int t=0; t<settingsCount; t++){
     unsigned int settingIndex=CONFIG_START+2+(t*sSize);
     byte slen = settings[t].length();
+    log_noline("String saving length: ");
+    log_line(settings[t].length());
     SettingsStruct thisSetting = {
       stringStartIndex, slen
     };
@@ -347,39 +324,33 @@ void initialTimeSet(){
   int hour = 10+6;
   int minute = 8;
   int second = 50;
-  if(debug_mode){
-    Serial.println("Setting initial time");
-  }
+  log_line("Setting initial time");
   setTime(hour, minute, second, day, month, year);   //set the system time to 23h31m30s on 13Feb2009
   RTC.set(now());                     //set the RTC from the system time
 }
 
 void digitalClockDisplay(void)
 {
-  if(debug_mode){
-    // digital clock display of the time
-    Serial.print(hour());
-    printDigits(minute());
-    printDigits(second());
-    Serial.print(' ');
-    Serial.print(day());
-    Serial.print(' ');
-    Serial.print(month());
-    Serial.print(' ');
-    Serial.print(year()); 
-    Serial.println();
-  } 
+  // digital clock display of the time
+  log_noline(hour());
+  printDigits(minute());
+  printDigits(second());
+  log_noline(' ');
+  log_noline(day());
+  log_noline(' ');
+  log_noline(month());
+  log_noline(' ');
+  log_noline(year()); 
+  log_line();
 }
 void printDigits(int digits)
 {
-  if(debug_mode){
-    // utility function for digital clock display: prints preceding colon and leading 0
-    Serial.print(':');
-    if(digits < 10) {
-        Serial.print('0');
-    }
-    Serial.print(digits);
+  // utility function for digital clock display: prints preceding colon and leading 0
+  log_noline(':');
+  if(digits < 10) {
+      log_noline('0');
   }
+  log_noline(digits);
 }
 ///END RTC Stuff
 
@@ -389,12 +360,13 @@ void prepareOtp(){
   //Set setting from eeprom
   unsigned int l=settings[OTP_SETTING_INDEX].length();
   if(l == 0){
-    Serial.println("No valid OTP, defaulting");
+    log_line("No valid OTP, defaulting");
     totp = TOTP(0,1);
     return;
   }
-  Serial.println(l);
   char otp_seed[l];
+  Serial.print("Incoming setting: ");
+  Serial.println(settings[OTP_SETTING_INDEX]);
   settings[OTP_SETTING_INDEX].toCharArray(otp_seed,l+1); // Arraysize + 1 for proper extraction
   Serial.println(otp_seed);
   int decoded_size=0;
@@ -473,4 +445,43 @@ uint32_t Wheel(byte WheelPos) {
   return pixels.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
 }
 //// END Pixel stuff
+
+void log_line(){
+  if(debug_mode){Serial.println();}
+}
+void log_line(const char input){
+  if(debug_mode){Serial.println(input);}
+}
+void log_line(unsigned int input){
+  if(debug_mode){Serial.println(input);}
+}
+void log_line(int input){
+  if(debug_mode){Serial.println(input);}
+}
+void log_line(const char* input){
+  if(debug_mode){Serial.println(input);}
+}
+void log_line(char* input){
+  if(debug_mode){Serial.println(input);}
+}
+
+void log_noline(const char input){
+  if(debug_mode){Serial.print(input);}
+}
+void log_noline(unsigned int input){
+  if(debug_mode){Serial.print(input);}
+}
+void log_noline(int input){
+  if(debug_mode){Serial.print(input);}
+}
+void log_noline(const char* input){
+  if(debug_mode){Serial.print(input);}
+}
+void log_noline(char* input){
+  if(debug_mode){Serial.print(input);}
+}
+
+void log_string(String input){
+  if(debug_mode){Serial.println(input);}
+}
 
