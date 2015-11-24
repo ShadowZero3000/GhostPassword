@@ -36,3 +36,21 @@ Android/GhostPassword/.idea
 *.iml
 /Android/GhostPassword/.nb-gradle/
 /Android/GhostPassword/app/target/
+
+#Images
+*.png
+*.jpg
+Thumbs.db
+
+#Binary zips
+*.zip
+
+#Backup files
+*.bak
+
+#Sketchup autosaves
+AutoSave_*.skp
+*.skb
+
+#Kicad backups
+*.kicad_pcb-bak
