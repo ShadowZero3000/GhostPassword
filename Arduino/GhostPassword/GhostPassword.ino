@@ -66,7 +66,7 @@ int bt_input_length=0;
 int receiving_input=0;
 int receiving_type=0;
 TOTP totp = TOTP({},0);
-bool debug_mode = true;
+bool debug_mode = false;
 
 struct SettingsStruct {
   // This detects that they are our stored settings
