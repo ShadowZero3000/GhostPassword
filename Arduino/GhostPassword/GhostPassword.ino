@@ -40,6 +40,7 @@
 #define INPUT_TIMESTAMP 3
 
 #define BUTTON_PIN 7
+#define BUTTON_DELAY 500
 #define LED_PIN 2
 #define LED_COUNT 1
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
@@ -191,7 +192,7 @@ void loop() {
     log_noline("OTP Code: ");
     log_line(totp.getCode(now()));
     Keyboard.write(totp.getCode(now()));
-    delay(1000);
+    delay(BUTTON_DELAY);
     setColor(led_status);
   } else {
     //log_line("Button is not pressed...");
