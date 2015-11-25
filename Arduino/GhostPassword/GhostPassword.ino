@@ -75,7 +75,7 @@ struct SettingsStruct {
 };
 char* settings[MAX_SETTINGS];
 byte settingsCount=0;
-
+char led_status = 'o';
 
 void setup() {
   Serial.begin(9600);
@@ -91,29 +91,29 @@ void setup() {
   log_line("Settings loaded");
 
   pixels.begin();
-  setColor('o');
+  pixels.setBrightness(16);
+  setColor(led_status);
   //initialTimeSet();
   // Get your timer detail from the RTC
   setSyncProvider(RTC.get);   // the function to get the time from the RTC  
   if(timeStatus() != timeSet) {
       log_line("Unable to sync with the RTC");
-      setColor('r');
+      led_status='r';
   }
   else {
       log_line("RTC has set the system time");   
-      setColor('g');
+      led_status='g';
   }
+  setColor(led_status);
   prepareOtp();
   digitalClockDisplay();
   
   // Prep bluetooth
   prepBluetooth();
   if(timeStatus() != timeSet) {
-    setColor('r');
-  } else {
-    pixels.setBrightness(16);
-    setColor('g'); 
+      led_status='o';
   }
+  setColor(led_status);
 }
 
 void prepBluetooth(){
@@ -143,6 +143,8 @@ void loop() {
   // put your main code here, to run repeatedly:
   if(bluetooth.available())  // If the bluetooth sent any characters
   {
+    
+    setColor('y');
     char input = bluetooth.read();
     byte initial_char=0;
     if(receiving_input==0){
@@ -171,6 +173,7 @@ void loop() {
         processInput(receiving_type);
         bt_input_length=0;
         receiving_type=INPUT_NONE;
+        setColor(led_status);
       }
     }
     if(receiving_input==1 && initial_char==0) {
@@ -182,12 +185,14 @@ void loop() {
   }
   
   if (digitalRead(BUTTON_PIN) == LOW) {
+    setColor('y');
     log_line("Button pressed!!!");
     digitalClockDisplay();
     log_noline("OTP Code: ");
     log_line(totp.getCode(now()));
     Keyboard.write(totp.getCode(now()));
-    delay(1500);
+    delay(1000);
+    setColor(led_status);
   } else {
     //log_line("Button is not pressed...");
     //delay(100);
@@ -412,6 +417,8 @@ void setColor(char color){
     case 'b': val=169;
       break;
     case 'g': val=84;
+      break;
+    case 'y': val=45;
       break;
   }
   pixels.setPixelColor(0, Wheel(val));
