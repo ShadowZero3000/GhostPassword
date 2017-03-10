@@ -1,45 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.github.ghostpassword.android" >
-
-    <uses-feature android:name="android.hardware.camera" />
+    xmlns:tools="http://schemas.android.com/tools"
+    package="rocks.codethat.ghostpassword">
 
     <uses-permission android:name="android.permission.BLUETOOTH" />
 
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+
     <application
+        android:name="rocks.codethat.ghostpassword.GhostPassword"
         android:allowBackup="true"
-        android:icon="@mipmap/pacman_ghost_2"
+        android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
+        android:supportsRtl="true"
+        tools:replace="android:icon"
+        android:theme="@style/AppTheme">
         <activity
-            android:name=".MainScreen"
-            android:label="@string/app_name" >
+            android:name=".MainActivity"
+            android:label="@string/app_name"
+            android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".DisplayOneTimeActivity"
-            android:label="@string/title_activity_display_one_time" >
-        </activity>
-        <activity
-            android:name=".UnlockActivity"
-            android:label="@string/title_activity_display_saved_pass_screen" >
-        </activity>
-        <activity
-            android:name=".CheckAndInit"
-            android:label="@string/title_activity_check_and_init" >
-        </activity>
-        <activity
-            android:name=".SavedPasswordMainActivity"
-            android:label="@string/title_activity_saved_password_main" >
-        </activity>
-        <activity
-            android:name=".AddNewPasswordActivity"
-            android:label="@string/title_activity_add_new_password" >
-        </activity>
+        <receiver android:name="rocks.codethat.ghostpassword.keepass2android_integration.Keepass2Android_IntegrationAccessReceiver"
+                  android:exported="true">
+            <intent-filter>
+                <action android:name="keepass2android.ACTION_TRIGGER_REQUEST_ACCESS"/>
+                <action android:name="keepass2android.ACTION_RECEIVE_ACCESS"/>
+                <action android:name="keepass2android.ACTION_REVOKE_ACCESS"/>
+            </intent-filter>
+        </receiver>
+        <receiver android:name="rocks.codethat.ghostpassword.keepass2android_integration.Keepass2Android_IntegrationActionReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="keepass2android.ACTION_OPEN_ENTRY"/>
+                <action android:name="keepass2android.ACTION_CLOSE_ENTRY_VIEW"/>
+                <action android:name="keepass2android.ACTION_ENTRY_ACTION_SELECTED"/>
+
+                <action android:name="keepass2android.ACTION_LOCK_DATABASE"/>
+                <action android:name="keepass2android.ACTION_UNLOCK_DATABASE"/>
+                <action android:name="keepass2android.ACTION_CLOSE_DATABASE"/>
+                <action android:name="keepass2android.ACTION_OPEN_DATABASE"/>
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>
