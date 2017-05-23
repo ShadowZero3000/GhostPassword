@@ -1,14 +1,15 @@
 // For storage permanence
 #include <EEPROM.h>
 // For RTC
-#include <Time.h>
+#include <TimeLib.h>
 #include <DS3232RTC.h>
 #include <Wire.h>
+
 // For OTP
 #include <TOTP.h>
 #include <sha1.h>
 // For Bluetooth
-#include <SoftwareSerial.h>
+// #include <SoftwareSerial.h>
 // For Pixels
 #include <Adafruit_NeoPixel.h>
 #include <Arduino.h>  // for type definitions
@@ -27,28 +28,42 @@
 
 #define CONFIG_VERSION 2
 #define CONFIG_START 1
-#define SETTING_STRING_SIZE 254
-#define EEPROM_MIN_ADDR 0
+// #define SETTING_STRING_SIZE 254
+// #define EEPROM_MIN_ADDR 0
+// Not used, but here for reference if we chose to.
 //#define EEPROM_MAX_ADDR 128 // Max size on the Teensy LC
-#define EEPROM_MAX_ADDR 1024 // Max size on the Teensy 2
+//#define EEPROM_MAX_ADDR 1024 // Max size on the Teensy 2
 
+#define INPUT_NONE 0
+#define INPUT_STRING 1
+#define INPUT_QR 2
+#define INPUT_TIMESTAMP 3
 
 #define BUTTON_PIN 7
+#define BUTTON_DELAY 500
 #define LED_PIN 2
 #define LED_COUNT 1
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
 
 #define OTP_SETTING_INDEX 0
+#define OTP_STRING_LENGTH 64
+#define MAX_BT_INPUT 256
+
+// LC can only hold one, the others could hold more
+#define MAX_SETTINGS 1
+
 
 //Tx = 0 on LC
 //Rx = 1 on LC
-int bluetoothTx = 0;  // TX-O pin of bluetooth mate, Arduino D2
-int bluetoothRx = 1;  // RX-I pin of bluetooth mate, Arduino D3
-int bluetoothInitBaud = 115200;
-int bluetoothBaud = 9600;
-char BTName[] = "GhostPassword";
-SoftwareSerial bluetooth(bluetoothTx,bluetoothRx);
-String bt_input="";
+#define bluetoothTx 0 //;  // TX-O pin of bluetooth mate, Arduino D2
+#define bluetoothRx 1 //;  // RX-I pin of bluetooth mate, Arduino D3
+// int bluetoothInitBaud = 115200;
+const int bluetoothBaud = 9600;
+//char BTName[] = "GhostPassword";
+//SoftwareSerial bluetooth(bluetoothTx,bluetoothRx);
+#define bluetooth Serial1
+char bt_input[256];
+int bt_input_length=0;
 int receiving_input=0;
 int receiving_type=0;
 TOTP totp = TOTP({},0);
@@ -59,159 +74,188 @@ struct SettingsStruct {
   uint8_t stringStart;
   byte stringSize;
 };
-String* settings;
+char* settings[MAX_SETTINGS];
 byte settingsCount=0;
-
+char led_status = 'o';
 
 void setup() {
   Serial.begin(9600);
-  
+  delay(500);
   //Prep button
   pinMode(BUTTON_PIN, INPUT_PULLUP);
-  //pinMode(BUTTON_PWR_PIN, OUTPUT);
-  //digitalWrite(BUTTON_PWR_PIN, HIGH);
 
   if (digitalRead(BUTTON_PIN) == LOW) {
     debug_mode = true;
-    Serial.println("Entering debug mode.");
-  }
-  /*
-  settingsCount=1;
-  settings = new String[1];
-  settings[0]=String("Test");
-  saveConfig();
-  */
+    log_line("Entering debug mode.");
+  }  
   loadConfig();
-  /*
-  */
+  log_line("Settings loaded");
+
   pixels.begin();
-  setColor('o');
+  pixels.setBrightness(16);
+  setColor(led_status);
   //initialTimeSet();
   // Get your timer detail from the RTC
-  setSyncProvider(RTC.get);   // the function to get the time from the RTC
+  setSyncProvider(RTC.get);   // the function to get the time from the RTC  
   if(timeStatus() != timeSet) {
-      if(debug_mode){
-        Serial.println("Unable to sync with the RTC");
-      }
-      setColor('r');
+      log_line("Unable to sync with the RTC");
+      led_status='r';
   }
   else {
-      if(debug_mode){
-        Serial.println("RTC has set the system time");   
-      }
-      setColor('g');
+      log_line("RTC has set the system time");   
+      led_status='g';
   }
+  setColor(led_status);
   prepareOtp();
   digitalClockDisplay();
   
   // Prep bluetooth
-   setColor('b');
-   bluetooth.begin(115200);
-   delay(200);
-   bluetooth.print("$");
-   bluetooth.print("$");
-   bluetooth.print("$");
-   delay(200);
-   // This sets the config timeout to 3 seconds, otherwise
-   // It takes 60 seconds after bootup
-   bluetooth.println("ST,3");
-   delay(200);
-   bluetooth.println("SN,GhostPassword");
-   delay(200);
-   bluetooth.println("U,9600,N");
-   
-   if(debug_mode){
-     Serial.print(bluetooth.readString());
-   }
-   delay(200);
-   
-   bluetooth.begin(bluetoothBaud);
-   
-   if(debug_mode){
-     Serial.println("Bluetooth Baud set to 9600");
-   }
-   if(timeStatus() != timeSet) {
-      setColor('r');
-  } else {
-      pixels.setBrightness(16);
-      setColor('g'); 
+  prepBluetooth();
+  if(timeStatus() != timeSet) {
+      led_status='o';
   }
-   
+  setColor(led_status);
 }
 
+void prepBluetooth(){
+  setColor('b');
+  bluetooth.begin(115200);
+  delay(200);
+  bluetooth.print("$");
+  bluetooth.print("$");
+  bluetooth.print("$");
+  delay(200);
+  // This sets the config timeout to 3 seconds, otherwise
+  // It takes 60 seconds after bootup
+  bluetooth.println("ST,3");
+  delay(200);
+  bluetooth.println("SN,GhostPassword");
+  delay(200);
+  bluetooth.println("U,9600,N");
+  
+  log_string(bluetooth.readString());
+  
+  delay(200);
+  
+  bluetooth.begin(bluetoothBaud);
+  log_line("Bluetooth Baud set to 9600");
+}
 void loop() {
   // put your main code here, to run repeatedly:
   if(bluetooth.available())  // If the bluetooth sent any characters
   {
+    
+    setColor('y');
     char input = bluetooth.read();
     byte initial_char=0;
     if(receiving_input==0){
       // If we are starting a new string
       if(input==':'){
         receiving_input=1;
-        receiving_type=1;
+        receiving_type=INPUT_STRING;
         initial_char=1;
       }
       // If we are starting a new QR code
       if(input=='-'){
         receiving_input=1;
-        receiving_type=2;
+        receiving_type=INPUT_QR;
+        initial_char=1;
+      }
+      // If we are starting a new timestamp
+      if(input=='@'){
+        receiving_input=1;
+        receiving_type=INPUT_TIMESTAMP;
         initial_char=1;
       }
     } else {
       // If we are in a receiving type
       if(input==':'){
         receiving_input=0;
-        processInput(bt_input,receiving_type);
-        bt_input="";
-        receiving_type=0;
+        processInput(receiving_type);
+        bt_input_length=0;
+        receiving_type=INPUT_NONE;
+        setColor(led_status);
       }
     }
     if(receiving_input==1 && initial_char==0) {
-      bt_input = bt_input + input;
+      bt_input[bt_input_length] = input;
+      bt_input_length++;
     } else {
       initial_char = 0;
     }
-    
   }
   
   if (digitalRead(BUTTON_PIN) == LOW) {
-    if(debug_mode){
-      Serial.println("Button pressed!!!");
-      Serial.print("OTP Code: ");
-      Serial.println(totp.getCode(now()));
-    }
+    setColor('y');
+    log_line("Button pressed!!!");
+    digitalClockDisplay();
+    log_noline("OTP Code: ");
+    log_line(totp.getCode(now()));
     Keyboard.write(totp.getCode(now()));
-    delay(1500);
+    delay(BUTTON_DELAY);
+    setColor(led_status);
   } else {
-    //Serial.println("Button is not pressed...");
+    //log_line("Button is not pressed...");
     //delay(100);
   }
 }
 
 
-void processInput(String input_string,int type){
-  if(debug_mode){
-    Serial.println();
+void processInput(int type){
+  char input_string[bt_input_length];
+  for(int i=0; i<bt_input_length; i++){
+    input_string[i]=bt_input[i];
   }
-  if(receiving_type==2){
-    if(debug_mode){
-      Serial.print("QR Code received: ");
-      Serial.println(input_string);
-      Serial.print("Length: ");
-      Serial.println(input_string.length());
+  log_line();
+  log_line("---");
+  //If getting time
+  if(receiving_type==INPUT_TIMESTAMP){
+    log_noline("Time received: ");
+    log_line(input_string);
+    log_noline("Length: ");
+    log_line(bt_input_length);
+    //Shave off the millis
+    char time_string[bt_input_length - 3];
+    for (int i=0; i<bt_input_length - 3; i++){
+      time_string[i] = input_string[i];
     }
+    //long  l = input_string[0] | (input_string[1] << 8) | (input_string[2] << 16) | (input_string[3] << 24);
+    setTime(atol(time_string));
+    RTC.set(now());
+    log_line("Time set");
+    
+    digitalClockDisplay();
+  } 
+  if(receiving_type==INPUT_QR){
+    log_noline("QR Code received: ");
+    log_line(input_string);
+    log_noline("Length: ");
+    log_line(bt_input_length);
     //char otp_seed[] = "R4U3Y7HAL5KYFWNKCOZSKTWQQGSQX6H5TFR7UEKZMMAGGV2YYDB4KZ2SPNB3LZ52"; 
-    settings[0] = String(input_string);
+    //delete settings[0];
+    //settings = new String[1];
+    char true_input[bt_input_length+1];
+    for(int i=0; i<bt_input_length; i++){
+      true_input[i]=input_string[i];
+    }
+    true_input[bt_input_length]='\0';
+    
+    settings[0] = true_input; //String(input_string);
+    log_line("Ending is: ");
+    log_line(true_input[64]=='\0');
+    log_line(strlen(true_input));
+    log_line(true_input[64]);
+    settingsCount = 1;
     saveConfig();
+    log_line("Otp preparing");
+    log_string(settings[0]);
     // Since we have a new OTP, run the initializer for it
     prepareOtp();
+    log_line("OTP Prepped");
   } 
-  if(receiving_type==1){
-    if(debug_mode){
-      Serial.print("String input received. Typing: ");
-      Serial.println(input_string);
-    }
+  if(receiving_type==INPUT_STRING){
+    log_noline("String input received. Typing: ");
+    log_line(input_string);
     Keyboard.print(input_string);
   }
 }
@@ -219,15 +263,11 @@ void processInput(String input_string,int type){
 
 //BEGIN EEPROM stuff
 void loadConfig() {
-  if(debug_mode){
-    Serial.println("Reading from EEPROM...");
-  }
+  log_line("Reading from EEPROM...");
   if(EEPROM.read(CONFIG_START + 0) == CONFIG_VERSION) {
     settingsCount=EEPROM.read(CONFIG_START + 1);
     
     unsigned int sSize=sizeof(SettingsStruct);
-    //delete[] settings;
-    settings = new String[settingsCount];
     for(unsigned int t=0; t<settingsCount; t++){
       SettingsStruct setting;
       unsigned int settingsIndex=CONFIG_START+2+(t*sSize);
@@ -237,99 +277,77 @@ void loadConfig() {
         *((char*)&setting + j) = EEPROM.read(settingsIndex + j);
       }
       
-      settings[t]=String("");
-      char input[setting.stringSize];
+      log_noline("String size: ");
+      log_line(setting.stringSize);
+      settings[t]= new char[setting.stringSize + 1];
       for(unsigned int k=0; k<setting.stringSize; k++){
-        *((char*)&input + k)  = EEPROM.read(setting.stringStart + k);
+        settings[t][k] = (char)EEPROM.read(setting.stringStart + k);
       }
+      settings[t][setting.stringSize] = '\0';
       // Use this section to validate reading of settings
-      
-      if(debug_mode){
-        Serial.print("For setting: ");
-        Serial.print(t);
-        Serial.print(" we read: ");
-        Serial.println(input);
-      }
-      settings[t]=String(input);
+    
+      log_noline("For setting: ");
+      log_noline(t);
+      log_noline(" we read: ");
+      log_line(settings[t]);
     }
   } else {
-    if(debug_mode){
-      Serial.println("No settings to load");
-    }
-    settings = new String[0];
-    settings[0] = "";
+    log_line("No settings to load");
+    settings[0] = new char[1];
+    settings[0][0] = '\0';
+    settingsCount = 1;
   }
 }
 void saveConfig() {
-  if(debug_mode){
-    Serial.println("Writing settings to EEPROM...");
-  }
+  log_line("Writing settings to EEPROM...");
   EEPROM.write(CONFIG_START + 0, CONFIG_VERSION);
   EEPROM.write(CONFIG_START + 1, settingsCount);
   byte sSize=sizeof(SettingsStruct);
-  unsigned int stringStartIndex=CONFIG_START+2+settingsCount*sSize;
+  uint8_t stringStartIndex=CONFIG_START+2+settingsCount*sSize;
+  
+  log_line(settingsCount);
   for(unsigned int t=0; t<settingsCount; t++){
     unsigned int settingIndex=CONFIG_START+2+(t*sSize);
-    byte slen = settings[t].length();
+    byte slen = strlen(settings[0]);
+    log_noline("String saving length: ");
+    log_line(slen);
     SettingsStruct thisSetting = {
       stringStartIndex, slen
     };
-    char buffer[settings[t].length()+1];
-    settings[t].toCharArray(buffer,settings[t].length()+1);
     for(unsigned int j=0; j<sSize; j++){
       EEPROM.write(settingIndex+j, *((char*)&thisSetting + j));
     }
     for(unsigned int m=0; m<slen; m++){
-      EEPROM.write(stringStartIndex+m, *((char*)&buffer + m));
+      EEPROM.write(stringStartIndex+m, settings[t][m]); //*((char*)&buffer + m));
     }
-    
     stringStartIndex += slen + 1;
   }
 }
 //END EEPROM stuff
 
 //BEGIN RTC stuff
-
-void initialTimeSet(){
-  // This code is only needed for the initial sync
-  // Once set, it should be commented out.
-  // Remember that your time should be UTC (I think)
-  int year = 2015;
-  int month = 10;
-  int day = 13;
-  int hour = 10+6;
-  int minute = 8;
-  int second = 50;
-  setTime(hour, minute, second, day, month, year);   //set the system time to 23h31m30s on 13Feb2009
-  RTC.set(now());                     //set the RTC from the system time
-}
-
 void digitalClockDisplay(void)
 {
-  if(debug_mode){
-    // digital clock display of the time
-    Serial.print(hour());
-    printDigits(minute());
-    printDigits(second());
-    Serial.print(' ');
-    Serial.print(day());
-    Serial.print(' ');
-    Serial.print(month());
-    Serial.print(' ');
-    Serial.print(year()); 
-    Serial.println();
-  } 
+  // digital clock display of the time
+  log_noline(hour());
+  printDigits(minute());
+  printDigits(second());
+  log_noline(' ');
+  log_noline(day());
+  log_noline(' ');
+  log_noline(month());
+  log_noline(' ');
+  log_noline(year()); 
+  log_line();
 }
 void printDigits(int digits)
 {
-  if(debug_mode){
-    // utility function for digital clock display: prints preceding colon and leading 0
-    Serial.print(':');
-    if(digits < 10) {
-        Serial.print('0');
-    }
-    Serial.print(digits);
+  // utility function for digital clock display: prints preceding colon and leading 0
+  log_noline(':');
+  if(digits < 10) {
+      log_noline('0');
   }
+  log_noline(digits);
 }
 ///END RTC Stuff
 
@@ -337,12 +355,15 @@ void printDigits(int digits)
 //// BEGIN OTP Stuff
 void prepareOtp(){
   //Set setting from eeprom
-  unsigned int l=settings[OTP_SETTING_INDEX].length();
-  char otp_seed[l];
-  settings[OTP_SETTING_INDEX].toCharArray(otp_seed,l+1); // Arraysize + 1 for proper extraction
+  unsigned int l=strlen(settings[OTP_SETTING_INDEX]);
+  if(l == 0){
+    log_line("No valid OTP, defaulting");
+    totp = TOTP(0,1);
+    return;
+  }  
   int decoded_size=0;
   uint8_t* decoded_seed;
-  base32decode(otp_seed, sizeof(otp_seed), decoded_seed, decoded_size);
+  base32decode(settings[OTP_SETTING_INDEX], l, decoded_seed, decoded_size); //otp_seed, l, decoded_seed, decoded_size);
   totp = TOTP(decoded_seed, decoded_size);
 }
 
@@ -374,11 +395,11 @@ void base32decode(char input[], int inputLen, uint8_t* &output, int &output_size
       }
      }
   }
-  
   output = new uint8_t[count];
   for(int i=0; i<count; i++){
     output[i] = temp_array[i];
   }
+  delete[] temp_array;
   output_size = count;
 }
 
@@ -398,6 +419,8 @@ void setColor(char color){
       break;
     case 'g': val=84;
       break;
+    case 'y': val=45;
+      break;
   }
   pixels.setPixelColor(0, Wheel(val));
   pixels.show();
@@ -415,3 +438,46 @@ uint32_t Wheel(byte WheelPos) {
   return pixels.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
 }
 //// END Pixel stuff
+
+
+//// BEGIN Logging stuff
+void log_line(){
+  if(debug_mode){Serial.println();}
+}
+void log_line(const char input){
+  if(debug_mode){Serial.println(input);}
+}
+void log_line(unsigned int input){
+  if(debug_mode){Serial.println(input);}
+}
+void log_line(int input){
+  if(debug_mode){Serial.println(input);}
+}
+void log_line(const char* input){
+  if(debug_mode){Serial.println(input);}
+}
+void log_line(char* input){
+  if(debug_mode){Serial.println(input);}
+}
+
+void log_noline(const char input){
+  if(debug_mode){Serial.print(input);}
+}
+void log_noline(unsigned int input){
+  if(debug_mode){Serial.print(input);}
+}
+void log_noline(int input){
+  if(debug_mode){Serial.print(input);}
+}
+void log_noline(const char* input){
+  if(debug_mode){Serial.print(input);}
+}
+void log_noline(char* input){
+  if(debug_mode){Serial.print(input);}
+}
+
+void log_string(String input){
+  if(debug_mode){Serial.println(input);}
+}
+
+//// END Logging stuff
