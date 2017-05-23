@@ -1,7 +1,7 @@
 // For storage permanence
 #include <EEPROM.h>
 // For RTC
-#include <Time.h>
+#include <TimeLib.h>
 #include <DS3232RTC.h>
 #include <Wire.h>
 
@@ -395,11 +395,11 @@ void base32decode(char input[], int inputLen, uint8_t* &output, int &output_size
       }
      }
   }
-  delete[] temp_array;
   output = new uint8_t[count];
   for(int i=0; i<count; i++){
     output[i] = temp_array[i];
   }
+  delete[] temp_array;
   output_size = count;
 }
 
