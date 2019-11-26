@@ -6,9 +6,7 @@ package rocks.codethat.ghostpassword.keepass2android_integration;
 
 import keepass2android.pluginsdk.PluginAccessException;
 import keepass2android.pluginsdk.Strings;
-import rocks.codethat.ghostpassword.BluetoothChatService;
-import rocks.codethat.ghostpassword.GhostPassword;
-import rocks.codethat.ghostpassword.GhostPasswordException;
+import rocks.codethat.ghostpassword.*;
 import rocks.codethat.ghostpassword.R;
 
 import android.content.Context;

@@ -4,27 +4,16 @@ package rocks.codethat.ghostpassword.keepass2android_integration;
  * Created by Sparrow on 12/4/2016.
  */
 
-        import java.util.ArrayList;
-        import java.util.HashMap;
+import android.app.Activity;
+import android.app.Fragment;
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.MenuItem;
 
-        import keepass2android.pluginsdk.KeepassDefs;
-        import keepass2android.pluginsdk.Kp2aControl;
-        import android.app.Activity;
-        import android.app.Fragment;
-        import android.content.ActivityNotFoundException;
-        import android.content.Intent;
-        import android.os.Bundle;
-        import android.util.Log;
-        import android.view.LayoutInflater;
-        import android.view.Menu;
-        import android.view.MenuItem;
-        import android.view.View;
-        import android.view.View.OnClickListener;
-        import android.view.ViewGroup;
-        import android.widget.Toast;
+import java.util.HashMap;
 
-        import rocks.codethat.ghostpassword.GhostPassword;
-        import rocks.codethat.ghostpassword.R;
+import keepass2android.pluginsdk.Kp2aControl;
+import rocks.codethat.ghostpassword.R;
 
 public class Keepass2Android_Integration extends Activity {
 

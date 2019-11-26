@@ -44,10 +44,11 @@ import android.widget.Toast;
  * thread for performing data transmissions when connected.
  */
 public class BluetoothChatService {
+
     private static BluetoothChatService mInstance = null;
     private final String DATEFORMAT = "HH-mm-ss-dd-MM-yyyy"; // Specific format that the arduino reads
     private final SimpleDateFormat sdf = new SimpleDateFormat(DATEFORMAT);
-    public static synchronized BluetoothChatService getInstance() throws GhostPasswordException {
+    public static BluetoothChatService getInstance() throws GhostPasswordException {
         if(null == mInstance){
             try {
                 mInstance = new BluetoothChatService();
@@ -75,7 +76,15 @@ public class BluetoothChatService {
         // Ensure that the time is corrected for any drift
         sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
         // Wrap the datetime with a time identifier for the arduino
-        String dateString= '!' + sdf.format(new Date()) + ':';
+        String dateString= '@' + Long.toString(System.currentTimeMillis()) + ':';
+        Log.d("MainActivity", "Date string sent: "+dateString);
+        mInstance.write(dateString.getBytes());
+    }
+    public void writeTime() throws IOException, GhostPasswordException {
+        // Ensure that the time is corrected for any drift
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+        // Wrap the datetime with a time identifier for the arduino
+        String dateString= '@' + Long.toString(System.currentTimeMillis()) + ':';
         Log.d("MainActivity", "Date string sent: "+dateString);
         mInstance.write(dateString.getBytes());
     }

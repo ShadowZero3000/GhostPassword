@@ -1,20 +1,17 @@
 package rocks.codethat.ghostpassword;
 
 import android.Manifest;
-import android.annotation.TargetApi;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
+import androidx.fragment.app.FragmentActivity;
+import androidx.core.content.ContextCompat;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.view.Menu;
@@ -119,6 +116,30 @@ public class MainActivity extends AppCompatActivity {
                     mChatService.writeString("Test message");
                 } catch (IOException|GhostPasswordException e) {
                     Toast.makeText(getActivity(), "Unable to send message", Toast.LENGTH_SHORT).show();
+                    e.printStackTrace();
+                }
+            }
+        });
+        FloatingActionButton time_button = (FloatingActionButton) findViewById(R.id.time);
+        time_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mChatService == null){
+                    try {
+                        startChat();
+                    } catch (GhostPasswordException e) {
+                        return;
+                    }
+                }
+                if (mChatService.getState() != BluetoothChatService.STATE_CONNECTED) {
+                    Toast.makeText(getActivity(), "Not connected", Toast.LENGTH_SHORT).show();
+                    mChatService.connect(mChatService.device,true);
+                    return;
+                }
+                try {
+                    mChatService.writeTime();
+                } catch (IOException|GhostPasswordException e) {
+                    Toast.makeText(getActivity(), "Unable to send time", Toast.LENGTH_SHORT).show();
                     e.printStackTrace();
                 }
             }
@@ -278,7 +299,7 @@ public class MainActivity extends AppCompatActivity {
                                 System.out.println("True result");
                                 System.out.println(map.get("secret"));
                                 // TODO: UNCOMMENT THIS LINE!!!
-                                // mChatService.writeQR(map.get("secret"));
+                                mChatService.writeQR(map.get("secret"));
                                 OTP_keys.add(result.getContents());
                                 saveKeys();
                             } //TODO: We should save all QR TOTP's so that you can re-send them
@@ -288,11 +309,10 @@ public class MainActivity extends AppCompatActivity {
                         //TODO: UNCOMMENT     e.printStackTrace();
                         } catch (URISyntaxException e) {
                             e.printStackTrace();
+                        } catch (java.io.IOException | GhostPasswordException e) {
+                            e.printStackTrace();
+                            Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
                         }
-                    //} catch (GhostPasswordException e) {
-                    //    e.printStackTrace();
-                    //    Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
-                   // }
                 }
             }
         } else {
